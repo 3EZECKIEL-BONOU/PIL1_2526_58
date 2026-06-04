@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IFRI_MentorLink - Accueil</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="#">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </div>
+    <span class="logo-text">IFRI<span>Mentor</span>Link</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#">Avantages</a></li>
+    <li><a href="#">Notre Mission</a></li>
+    <li><a href="#">Mentors</a></li>
+    <li><a href="#">Ressources</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="mentorlink_connexion.html" class="btn-outline">Connexion</a>
+    <a href="mentorlink_inscription.html" class="btn-primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+      Rejoindre
+    </a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">La plateforme de mentorat des étudiants IFRI</div>
+    <h1>Trouve ton<br>mentor.<br><span>Sans attendre.</span></h1>
+    <p class="hero-sub">IFRIMentorLink connecte les étudiants de l'IFRI entre eux pour du soutien académique et professionnel. Un algorithme intelligent propose les meilleures correspondances.</p>
+    
+    <div class="hero-search">
+      <input type="text" placeholder="Matière, compétence...">
+      <select>
+        <option>Toutes les filières</option>
+        <option>IA</option><option>IM</option><option>GL</option>
+        <option>SE&IoT</option><option>SI</option>
+      </select>
+      <button class="btn-search">Explorer</button>
+    </div>
+    <div class="tags">
+      <span class="tag">Algorithmique</span>
+      <span class="tag">Python</span>
+      <span class="tag">Bases de données</span>
+      <span class="tag">Développement web</span>
+      <span class="tag">Machine Learning</span>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="match-card">
+      <div class="match-card-header">
+        <span class="match-card-title"> Correspondances du jour</span>
+        <span class="match-badge">3 nouvelles</span>
+      </div>
+      <div class="mentor-item">
+        <div class="avatar av-blue">KA</div>
+        <div class="mentor-info">
+          <div class="mentor-name">Koffi Adjonou</div>
+          <div class="mentor-sub">Filière GL · Python, Algo</div>
+        </div>
+        <div class="score-bar">
+          <div class="bar-bg"><div class="bar-fill" style="width:92%"></div></div>
+          <span class="score-num">92%</span>
+        </div>
+        <button class="btn-match">Contacter</button>
+      </div>
+      <div class="mentor-item">
+        <div class="avatar av-green">MA</div>
+        <div class="mentor-info">
+          <div class="mentor-name">Mariame Alabi</div>
+          <div class="mentor-sub">Filière IA · ML, Stats</div>
+        </div>
+        <div class="score-bar">
+          <div class="bar-bg"><div class="bar-fill" style="width:85%"></div></div>
+          <span class="score-num">85%</span>
+        </div>
+        <button class="btn-match">Contacter</button>
+      </div>
+      <div class="mentor-item">
+        <div class="avatar av-purple">TB</div>
+        <div class="mentor-info">
+          <div class="mentor-name">Télesphore Bio</div>
+          <div class="mentor-sub">Filière SI · SQL, Réseaux</div>
+        </div>
+        <div class="score-bar">
+          <div class="bar-bg"><div class="bar-fill" style="width:78%"></div></div>
+          <span class="score-num">78%</span>
+        </div>
+        <button class="btn-match">Contacter</button>
+      </div>
+    </div>
+    <div class="notif-card">
+      <div class="notif-icon">💬</div>
+      <div>
+        <div class="notif-text"><span>Koffi Adjonou</span> t'a envoyé un message</div>
+        <div class="notif-time">Il y a 2 minutes · Session Algo confirmée pour jeudi</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="stat-num">+200</div><div class="stat-label">Étudiants inscrits</div></div>
+  <div class="stat"><div class="stat-num">+350</div><div class="stat-label">Sessions réalisées</div></div>
+  <div class="stat"><div class="stat-num">5</div><div class="stat-label">Filières couvertes</div></div>
+</div>
+
+<!-- WHY -->
+<section class="section">
+  <div class="section-badge">POURQUOI IFRI_MENTORLINK ?</div>
+  <h2>Ce qui change tout pour<br>votre progression</h2>
+  <p class="section-sub">Fini les blocages sans réponse. IFRIMentorLink permet de lever chaque obstacle que rencontre un étudiant de l'IFRI.</p>
+  
+  <div class="features">
+    <div class="feature">
+      <div class="feat-num">01</div>
+      <div class="feat-title">Algorithme de matching intelligent</div>
+      <div class="feat-desc">Notre algorithme analyse la compatibilité des compétences, la proximité des filières et la disponibilité horaire pour proposer les meilleures correspondances.</div>
+    </div>
+    <div class="feature">
+      <div class="feat-num">02</div>
+      <div class="feat-title">Messagerie intégrée</div>
+      <div class="feat-desc">Communiquez directement avec vos mentors ou mentorés via une messagerie instantanée avec historique complet et notifications en temps réel.</div>
+    </div>
+    <div class="feature">
+      <div class="feat-num">03</div>
+      <div class="feat-title">Proximité académique</div>
+      <div class="feat-desc">Trouvez des étudiants de niveaux proches, partageant votre parcours à l'IFRI, pour un soutien concret et adapté à vos cours.</div>
+    </div>
+    <div class="feature">
+      <div class="feat-num">04</div>
+      <div class="feat-title">Profils riches et vérifiés</div>
+      <div class="feat-desc">Chaque profil présente la filière, le niveau, les compétences maîtrisées, les besoins et les disponibilités pour des échanges ciblés et efficaces.</div>
+    </div>
+  </div>
+</section>
+
+<!-- PROFILES -->
+<section class="profiles-section">
+  <div class="section-badge">QUEL EST VOTRE PROFIL ?</div>
+  <h2>Un espace taillé pour vous</h2>
+  <p class="section-sub">Étudiant en quête d'aide ou prêt à partager vos connaissances — IFRIMentorLink s'adapte à vos objectifs.</p>
+  
+  <div class="profiles-grid">
+    <div class="profile-card active">
+      <div class="profile-role"> JE SUIS MENTORÉ</div>
+      <h3>Je cherche de l'aide</h3>
+      <p>Je rencontre des difficultés dans certaines matières et je veux trouver un étudiant compétent pour m'accompagner.</p>
+      <ul class="profile-list">
+        <li>Accès aux profils mentors compatibles</li>
+        <li>Matching automatique sur mes lacunes</li>
+        <li>Messagerie pour organiser les sessions</li>
+        <li>Suivi de mes progrès</li>
+      </ul>
+      <a href="mentorlink_inscription.html" class="btn-white">M'inscrire comme mentoré</a>
+    </div>
+    <div class="profile-card">
+      <div class="profile-role">🎓 JE SUIS MENTOR</div>
+      <h3>Je partage mes compétences</h3>
+      <p>Je maîtrise certaines matières et je veux aider mes pairs tout en renforçant mes propres compétences.</p>
+      <ul class="profile-list">
+        <li>Publication d'offres de mentorat</li>
+        <li>Profil candidat "Mentor IFRI"</li>
+        <li>Accès aux demandes des étudiants</li>
+        <li>Gestion de mes disponibilités</li>
+      </ul>
+      <a href="mentorlink_inscription.html" class="btn-primary btn-lg" style="display:inline-block;margin-top:0">M'inscrire comme mentor</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="logo">
+        <div class="logo-icon"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" fill="none" stroke="#fff" stroke-width="2"/><circle cx="9" cy="7" r="4" fill="none" stroke="#fff" stroke-width="2"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" fill="none" stroke="#fff" stroke-width="2"/></svg></div>
+        <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;color:#fff">IFRI<span style="color:var(--blue)">Mentor</span>Link</span>
+      </div>
+      <p>La première plateforme de mentorat étudiant de l'IFRI. Créée par des étudiants, pour des étudiants.</p>
+      <div class="socials" style="margin-top:16px">
+        <a class="soc" href="#">f</a>
+        <a class="soc" href="#">in</a>
+        <a class="soc" href="#">ig</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Plateforme</h4>
+      <ul>
+        <li><a href="#">Trouver un mentor</a></li>
+        <li><a href="#">Devenir mentor</a></li>
+        <li><a href="#">Comment ça marche</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Légal</h4>
+      <ul>
+        <li><a href="#">Mentions légales</a></li>
+        <li><a href="#">Confidentialité</a></li>
+        <li><a href="#">CGU</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <ul>
+        <li><a href="#">mentorlink@ifri.uac.bj</a></li>
+        <li><a href="#">Support disponible</a></li>
+        <li><a href="#">IFRI UAC</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 IFRIMentorLink IFRI. Tous droits réservés.</span>
+    <span>GROUPE 58 IFRI 2026</span>
+  </div>
+</footer>
+
+</body>
+</html>

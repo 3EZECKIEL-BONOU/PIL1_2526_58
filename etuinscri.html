@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IFRI_MentorLink - Inscription | Rejoignez la communauté</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--blue:#1A5CFF;--blue-dark:#0F3FCC;--blue-light:#EEF3FF;--navy:#0A1628;--text:#1A1A2E;--muted:#6B7280;--white:#fff;--bg:#F7F9FF;--border:#E2E8F0}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+
+  /* ========== NAVIGATION ========== */
+  nav{display:flex;align-items:center;justify-content:space-between;padding:0 5%;height:68px;background:var(--white);border-bottom:1px solid var(--border);flex-shrink:0}
+  .logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .logo-icon{width:36px;height:36px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center}
+  .logo-icon svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2}
+  .logo-text{font-family:'Syne',sans-serif;font-weight:700;font-size:18px;color:var(--text)}
+  .logo-text span{color:var(--blue)}
+  .nav-right{font-size:14px;color:var(--muted)}
+  .nav-right a{color:var(--blue);text-decoration:none;font-weight:600;transition:.2s}
+  .nav-right a:hover{text-decoration:underline}
+
+  /* ========== MAIN LAYOUT ========== */
+  main{display:grid;grid-template-columns:1fr 1fr;flex:1}
+
+  /* LEFT PANEL - BANDEAU MOTIVANT */
+  .left-panel{background:var(--navy);padding:60px 48px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
+  .left-panel::before{content:'';position:absolute;top:-80px;left:-80px;width:300px;height:300px;background:radial-gradient(circle,rgba(26,92,255,.2) 0%,transparent 70%)}
+  .left-panel::after{content:'';position:absolute;bottom:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(26,92,255,.12) 0%,transparent 70%)}
+  .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(26,92,255,.2);color:#7CB9FF;border:1px solid rgba(26,92,255,.3);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;margin-bottom:28px;width:fit-content}
+  .left-panel h1{font-family:'Syne',sans-serif;font-size:40px;font-weight:800;color:#fff;line-height:1.15;margin-bottom:16px}
+  .left-panel h1 span{color:#7CB9FF}
+  .left-panel p{font-size:15px;color:rgba(255,255,255,.6);line-height:1.7;margin-bottom:40px}
+  
+  .perks{display:flex;flex-direction:column;gap:20px}
+  .perk{display:flex;align-items:flex-start;gap:14px}
+  .perk-icon{width:44px;height:44px;background:rgba(26,92,255,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px}
+  .perk-text h4{font-size:15px;font-weight:600;color:#fff;margin-bottom:4px}
+  .perk-text p{font-size:13px;color:rgba(255,255,255,.5);line-height:1.5;margin-bottom:0}
+
+  /* RIGHT PANEL - FORMULAIRE */
+  .right-panel{background:var(--white);padding:48px 56px;overflow-y:auto}
+  .form-title{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--navy);text-align:center;margin-bottom:6px}
+  .form-sub{text-align:center;font-size:14px;color:var(--muted);margin-bottom:32px}
+
+  .section-divider{display:flex;align-items:center;gap:12px;margin:28px 0 18px;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted)}
+  .section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+  label{font-size:12px;font-weight:600;color:var(--text);letter-spacing:.3px;display:flex;align-items:center;gap:6px}
+  .label-icon{font-size:14px}
+  .input-wrap{position:relative}
+  .input-wrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted);fill:none;stroke:currentColor;stroke-width:1.8}
+  input,select,textarea{width:100%;padding:11px 12px 11px 40px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);transition:.2s;outline:none}
+  input:focus,select:focus,textarea:focus{border-color:var(--blue);background:var(--white);box-shadow:0 0 0 3px rgba(26,92,255,.1)}
+  input::placeholder{color:var(--muted)}
+  select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+  textarea{padding-left:12px;resize:none;min-height:80px}
+
+  .password-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);background:none;border:none;font-size:16px;padding:4px;display:flex;align-items:center;transition:.2s}
+  .password-toggle:hover{color:var(--blue)}
+
+  .chips-label{font-size:12px;font-weight:600;color:var(--text);letter-spacing:.3px;margin-bottom:8px;margin-top:4px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+  .chip{padding:6px 14px;border:1.5px solid var(--border);border-radius:30px;font-size:12px;cursor:pointer;transition:.2s;background:var(--bg);color:var(--muted);font-weight:500}
+  .chip:hover,.chip.active{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+
+  .role-select{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+  .role-card{border:2px solid var(--border);border-radius:14px;padding:16px 10px;cursor:pointer;transition:.2s;text-align:center;background:var(--white)}
+  .role-card:hover{border-color:var(--blue);transform:translateY(-2px)}
+  .role-card.selected{border-color:var(--blue);background:var(--blue-light);box-shadow:0 4px 12px rgba(26,92,255,.1)}
+  .role-card .emoji{font-size:28px;margin-bottom:8px}
+  .role-card h4{font-size:14px;font-weight:800;margin-bottom:4px;color:var(--navy)}
+  .role-card p{font-size:11px;color:var(--muted)}
+
+  .checkbox-row{display:flex;align-items:flex-start;gap:10px;margin:20px 0 24px}
+  .checkbox-row input[type=checkbox]{width:18px;height:18px;margin-top:1px;accent-color:var(--blue);cursor:pointer;padding:0}
+  .checkbox-row label{font-size:13px;color:var(--muted);cursor:pointer;padding:0;font-weight:400}
+  .checkbox-row a{color:var(--blue);text-decoration:none;font-weight:500}
+  .checkbox-row a:hover{text-decoration:underline}
+
+  .btn-submit{width:100%;padding:14px;background:var(--blue);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:'DM Sans',sans-serif;transition:.2s;margin-top:8px}
+  .btn-submit:hover{background:var(--blue-dark);transform:scale(1.01)}
+  .already{text-align:center;margin-top:20px;font-size:14px;color:var(--muted)}
+  .already a{color:var(--blue);font-weight:600;text-decoration:none}
+  .already a:hover{text-decoration:underline}
+
+  /* FOOTER */
+  footer{background:var(--navy);padding:20px 5%;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:0}
+  footer span{font-size:12px;color:rgba(255,255,255,.4)}
+  .footer-links{display:flex;gap:24px}
+  .footer-links a{font-size:12px;color:rgba(255,255,255,.4);text-decoration:none;transition:.2s}
+  .footer-links a:hover{color:#fff}
+
+  /* TOAST NOTIFICATION */
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:white;padding:12px 20px;border-radius:40px;font-size:13px;z-index:1000;box-shadow:0 10px 25px rgba(0,0,0,0.2);backdrop-filter:blur(8px);background:rgba(10,22,40,0.95);font-weight:500;pointer-events:none;animation:slideUp 0.3s ease}
+  @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+  @media (max-width: 900px) {
+    main{grid-template-columns:1fr}
+    .left-panel{display:none}
+    .right-panel{padding:32px 24px}
+    .form-row{grid-template-columns:1fr}
+  }
+  @media (max-width: 500px) {
+    .role-select{grid-template-columns:1fr}
+    footer{flex-direction:column;text-align:center}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="mentorlink_accueil.html">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </div>
+    <span class="logo-text">IFRI<span>Mentor</span>Link</span>
+  </a>
+  <div class="nav-right">Déjà un compte ? <a href="mentorlink_connexion.html">Se connecter →</a></div>
+</nav>
+
+<main>
+  <!-- LEFT PANEL (motivant) -->
+  <div class="left-panel">
+    <div class="badge">⚡ INSCRIPTION GRATUITE</div>
+    <h1>Trouve ton<br><span>mentor</span>.<br>Réussis.</h1>
+    <p>Crée ton profil, sois mis en relation automatiquement avec des étudiants compatibles de l'IFRI, et organise tes sessions de mentorat.</p>
+    
+    <div class="perks">
+      <div class="perk">
+        <div class="perk-icon">🎯</div>
+        <div class="perk-text">
+          <h4>Matching automatique</h4>
+          <p>L'algorithme trouve les meilleures correspondances selon tes compétences et disponibilités</p>
+        </div>
+      </div>
+      <div class="perk">
+        <div class="perk-icon">💬</div>
+        <div class="perk-text">
+          <h4>Messagerie intégrée</h4>
+          <p>Communique directement et organise tes sessions sans quitter la plateforme</p>
+        </div>
+      </div>
+      <div class="perk">
+        <div class="perk-icon">📚</div>
+        <div class="perk-text">
+          <h4>Toutes les filières IFRI</h4>
+          <p>IA, IM, GL, SE&IoT, SI — tous les étudiants sont les bienvenus</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL (formulaire inscription) -->
+  <div class="right-panel">
+    <div class="form-title">Inscription</div>
+    <div class="form-sub">Rejoins la communauté de mentorat de l'IFRI</div>
+
+    <!-- RÔLE (mentor / mentoré) -->
+    <div class="section-divider">MON RÔLE</div>
+    <div class="role-select" id="roleSelectContainer">
+      <div class="role-card selected" data-role="mentore" id="roleMentore">
+        <div class="emoji">🎓</div>
+        <h4>Je suis Mentoré</h4>
+        <p>Je cherche de l'aide</p>
+      </div>
+      <div class="role-card" data-role="mentor" id="roleMentor">
+        <div class="emoji">⭐</div>
+        <h4>Je suis Mentor</h4>
+        <p>Je partage mes connaissances</p>
+      </div>
+    </div>
+
+    <!-- INFOS PERSONNELLES -->
+    <div class="section-divider">INFORMATIONS PERSONNELLES</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>NOM</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <input type="text" id="nom" placeholder="Dupont">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>PRÉNOM</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <input type="text" id="prenom" placeholder="Jean">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>EMAIL</label>
+      <div class="input-wrap">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <input type="email" id="email" placeholder="jean@etudiant.bj">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>TÉLÉPHONE</label>
+      <div class="input-wrap">
+        <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.65 3.36 2 2 0 0 1 3.62 1.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <input type="tel" id="telephone" placeholder="+229 61 23 45 67">
+      </div>
+    </div>
+
+    <!-- ÉTUDES -->
+    <div class="section-divider">ÉTUDES</div>
+    <div class="form-group">
+      <label>FILIÈRE</label>
+      <div class="input-wrap">
+        <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        <select id="filiere">
+          <option value="">Sélectionnez une filière</option>
+          <option>Intelligence Artificielle (IA)</option>
+          <option>Ingénierie Mathématique (IM)</option>
+          <option>Génie Logiciel (GL)</option>
+          <option>Systèmes Embarqués & IoT (SE&IoT)</option>
+          <option>Systèmes d'Information (SI)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>NIVEAU D'ÉTUDES</label>
+      <div class="input-wrap">
+        <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        <select id="niveau">
+          <option value="">Sélectionnez un niveau</option>
+          <option>Licence 1 (L1)</option>
+          <option>Licence 2 (L2)</option>
+          <option>Licence 3 (L3)</option>
+          <option>Master 1 (M1)</option>
+          <option>Master 2 (M2)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- COMPÉTENCES & BESOINS -->
+    <div class="section-divider">COMPÉTENCES & BESOINS</div>
+
+    <div class="chips-label">Points forts (matières maîtrisées)</div>
+    <div class="chips" id="pointsFortsChips">
+      <span class="chip" data-skill="Python">Python</span>
+      <span class="chip" data-skill="Algorithmique">Algorithmique</span>
+      <span class="chip" data-skill="SQL/BDD">SQL / BDD</span>
+      <span class="chip active" data-skill="Développement web">Développement web</span>
+      <span class="chip" data-skill="Machine Learning">Machine Learning</span>
+      <span class="chip" data-skill="Réseaux">Réseaux</span>
+      <span class="chip" data-skill="Mathématiques">Mathématiques</span>
+      <span class="chip" data-skill="Java">Java</span>
+    </div>
+
+    <div class="chips-label">Points faibles (où j'ai besoin d'aide)</div>
+    <div class="chips" id="pointsFaiblesChips">
+      <span class="chip" data-skill="Python">Python</span>
+      <span class="chip active" data-skill="Algorithmique">Algorithmique</span>
+      <span class="chip" data-skill="SQL/BDD">SQL / BDD</span>
+      <span class="chip" data-skill="Développement web">Développement web</span>
+      <span class="chip active" data-skill="Machine Learning">Machine Learning</span>
+      <span class="chip" data-skill="Réseaux">Réseaux</span>
+      <span class="chip" data-skill="Mathématiques">Mathématiques</span>
+      <span class="chip" data-skill="Java">Java</span>
+    </div>
+
+    <!-- SÉCURITÉ -->
+    <div class="section-divider">SÉCURITÉ</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>MOT DE PASSE</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" id="password" placeholder="••••••••">
+          <button type="button" class="password-toggle" data-target="password">👁</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>CONFIRMER</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" id="confirmPassword" placeholder="••••••••">
+        </div>
+      </div>
+    </div>
+
+    <div class="checkbox-row">
+      <input type="checkbox" id="terms">
+      <label for="terms">J'accepte les <a href="#">conditions générales</a> et la <a href="#">politique de confidentialité</a></label>
+    </div>
+
+    <button class="btn-submit" id="submitBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+      Créer mon compte
+    </button>
+    <div class="already">Déjà inscrit ? <a href="mentorlink_connexion.html">Se connecter →</a></div>
+  </div>
+</main>
+
+<footer>
+  <span>© 2026 IFRIMentorLink · IFRI UAC</span>
+  <div class="footer-links">
+    <a href="#">Mentions légales</a>
+    <a href="#">Confidentialité</a>
+    <a href="#">CGU</a>
+    <a href="#">Contact</a>
+  </div>
+</footer>
+
+<script>
+  // Gestion chips (toggle)
+  function initChips() {
+    const allChips = document.querySelectorAll('.chip');
+    allChips.forEach(chip => {
+      chip.removeEventListener('click', chipClickHandler);
+      chip.addEventListener('click', chipClickHandler);
+    });
+  }
+  function chipClickHandler(e) {
+    e.stopPropagation();
+    this.classList.toggle('active');
+  }
+
+  // Gestion rôles (mentor/mentoré)
+  function initRoleSelection() {
+    const roleCards = document.querySelectorAll('.role-card');
+    roleCards.forEach(card => {
+      card.addEventListener('click', () => {
+        roleCards.forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        showToast(`Profil ${card.querySelector('h4')?.innerText || (card.dataset.role === 'mentor' ? 'Mentor' : 'Mentoré')} sélectionné ✅`);
+      });
+    });
+  }
+
+  // Affichage toast
+  function showToast(message, isError = false) {
+    let existingToast = document.querySelector('.toast');
+    if(existingToast) existingToast.remove();
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    if(isError) toast.style.background = "#c00";
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+  }
+
+  // Toggle mot de passe
+  function initPasswordToggle() {
+    const toggles = document.querySelectorAll('.password-toggle');
+    toggles.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        if(input) {
+          const type = input.type === 'password' ? 'text' : 'password';
+          input.type = type;
+          btn.textContent = type === 'password' ? '👁' : '🙈';
+        }
+      });
+    });
+  }
+
+  // Récupérer valeurs chips actives
+  function getActiveChips(containerId) {
+    const chips = document.querySelectorAll(`${containerId} .chip.active`);
+    return Array.from(chips).map(chip => chip.getAttribute('data-skill') || chip.innerText.trim());
+  }
+
+  // Validation du formulaire
+  function validateForm() {
+    const nom = document.getElementById('nom').value.trim();
+    const prenom = document.getElementById('prenom').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const telephone = document.getElementById('telephone').value.trim();
+    const filiere = document.getElementById('filiere').value;
+    const niveau = document.getElementById('niveau').value;
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirmPassword').value;
+    const terms = document.getElementById('terms').checked;
+
+    if(!nom || !prenom) { showToast("Veuillez renseigner votre nom et prénom", true); return false; }
+    if(!email || !email.includes('@')) { showToast("Email valide requis", true); return false; }
+    if(!telephone) { showToast("Numéro de téléphone requis", true); return false; }
+    if(!filiere) { showToast("Veuillez sélectionner votre filière", true); return false; }
+    if(!niveau) { showToast("Veuillez sélectionner votre niveau", true); return false; }
+    if(password.length < 6) { showToast("Le mot de passe doit contenir au moins 6 caractères", true); return false; }
+    if(password !== confirm) { showToast("Les mots de passe ne correspondent pas", true); return false; }
+    if(!terms) { showToast("Vous devez accepter les conditions générales", true); return false; }
+    return true;
+  }
+
+  // Simulation inscription
+  function handleSubmit(e) {
+    e.preventDefault();
+    if(!validateForm()) return;
+
+    const selectedRoleCard = document.querySelector('.role-card.selected');
+    let role = "mentore";
+    if(selectedRoleCard && selectedRoleCard.dataset.role === "mentor") role = "mentor";
+    
+    const pointsForts = getActiveChips('#pointsFortsChips');
+    const pointsFaibles = getActiveChips('#pointsFaiblesChips');
+    const nom = document.getElementById('nom').value;
+    const prenom = document.getElementById('prenom').value;
+    const email = document.getElementById('email').value;
+    
+    // Logique simulation inscription
+    console.log("Inscription simulée", { nom, prenom, email, role, pointsForts, pointsFaibles });
+    
+    // Afficher un message de succès et rediriger vers accueil (simulation)
+    showToast(`🎉 Bienvenue ${prenom} ${nom} ! Votre compte ${role === "mentor" ? "Mentor" : "Mentoré"} a été créé. Redirection...`);
+    setTimeout(() => {
+      window.location.href = "mentorlink_accueil.html";
+    }, 1800);
+  }
+
+  // Ajout d'effet de remplissage automatique (démo dynamique)
+  function demoFill() {
+    // optionnel pour l'expérience, préremplir des champs de démo
+    const urlParams = new URLSearchParams(window.location.search);
+    if(urlParams.get('demo') === '1') {
+      document.getElementById('nom').value = "Koffi";
+      document.getElementById('prenom').value = "Ange";
+      document.getElementById('email').value = "ange@ifri.bj";
+    }
+  }
+
+  // Initialisation complète
+  document.addEventListener('DOMContentLoaded', () => {
+    initChips();
+    initRoleSelection();
+    initPasswordToggle();
+    const submitBtn = document.getElementById('submitBtn');
+    if(submitBtn) submitBtn.addEventListener('click', handleSubmit);
+    demoFill();
+
+    // Amélioration: validation temps réel sur confirmation password
+    const confirmInput = document.getElementById('confirmPassword');
+    const passwordInput = document.getElementById('password');
+    function checkMatch() {
+      if(passwordInput.value && confirmInput.value && passwordInput.value !== confirmInput.value) {
+        confirmInput.style.borderColor = "#ff4d4f";
+      } else {
+        confirmInput.style.borderColor = "var(--border)";
+      }
+    }
+    passwordInput.addEventListener('input', checkMatch);
+    confirmInput.addEventListener('input', checkMatch);
+  });
+</script>
+</body>
+</html>
