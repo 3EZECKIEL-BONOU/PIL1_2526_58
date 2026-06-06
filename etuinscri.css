@@ -25,7 +25,7 @@ body {
   flex-direction: column;
   max-width: 1250px;           /* ← Largeur maximale de la page */
   margin: 0 auto;              /* ← Centre horizontalement */
-  padding: 10px
+  padding: 10px;
 }
 
 /* ========== NAVIGATION ========== */
@@ -92,14 +92,13 @@ nav {
   text-decoration: underline;
 }
 
-/* ========== MAIN LAYOUT ========== */
 main {
   display: grid;
   grid-template-columns: 1fr 1fr;
   flex: 1;
 }
 
-/* LEFT PANEL - BANDEAU MOTIVANT */
+
 .left-panel {
   background: var(--navy);
   padding: 60px 40px;
@@ -203,7 +202,7 @@ main {
   margin-bottom: 0;
 }
 
-/* RIGHT PANEL - FORMULAIRE */
+
 .right-panel {
   background: var(--white);
   padding: 48px 56px;
