@@ -19,7 +19,7 @@
 </nav>
 
 <main>
-  <!-- LEFT PANEL (motivant) -->
+ 
   <div class="left-panel">
     <div class="badge"> INSCRIPTION GRATUITE</div>
     <h1>Trouve ton<br><span>mentor</span>.<br>Réussis.</h1>
@@ -50,12 +50,12 @@
     </div>
   </div>
 
-  <!-- RIGHT PANEL (formulaire inscription) -->
+  
   <div class="right-panel">
     <div class="form-title">Inscription</div>
     <div class="form-sub">Rejoins la communauté de mentorat de l'IFRI</div>
 
-    <!-- RÔLE (mentor / mentoré) -->
+  
     <div class="section-divider">MON RÔLE</div>
     <div class="role-select" id="roleSelectContainer">
       <div class="role-card selected" data-role="mentore" id="roleMentore">
@@ -68,7 +68,7 @@
       </div>
     </div>
 
-    <!-- INFOS PERSONNELLES -->
+ 
     <div class="section-divider">INFORMATIONS PERSONNELLES</div>
     <div class="form-row">
       <div class="form-group">
@@ -103,7 +103,6 @@
       </div>
     </div>
 
-    <!-- ÉTUDES -->
     <div class="section-divider">ÉTUDES</div>
     <div class="form-group">
       <label>FILIÈRE</label>
@@ -135,7 +134,6 @@
       </div>
     </div>
 
-    <!-- COMPÉTENCES & BESOINS -->
     <div class="section-divider">COMPÉTENCES & BESOINS</div>
 
     <div class="chips-label">Points forts (matières maîtrisées)</div>
@@ -162,7 +160,6 @@
       <span class="chip" data-skill="Java">Java</span>
     </div>
 
-    <!-- SÉCURITÉ -->
     <div class="section-divider">SÉCURITÉ</div>
     <div class="form-row">
       <div class="form-group">
@@ -200,7 +197,6 @@
 </footer>
 
 <script>
-  // Gestion chips (toggle)
   function initChips() {
     const allChips = document.querySelectorAll('.chip');
     allChips.forEach(chip => {
@@ -213,7 +209,6 @@
     this.classList.toggle('active');
   }
 
-  // Gestion rôles (mentor/mentoré)
   function initRoleSelection() {
     const roleCards = document.querySelectorAll('.role-card');
     roleCards.forEach(card => {
@@ -225,7 +220,6 @@
     });
   }
 
-  // Affichage toast
   function showToast(message, isError = false) {
     let existingToast = document.querySelector('.toast');
     if(existingToast) existingToast.remove();
@@ -237,7 +231,6 @@
     setTimeout(() => toast.remove(), 3500);
   }
 
-  // Toggle mot de passe
   function initPasswordToggle() {
     const toggles = document.querySelectorAll('.password-toggle');
     toggles.forEach(btn => {
@@ -252,14 +245,11 @@
       });
     });
   }
-
-  // Récupérer valeurs chips actives
   function getActiveChips(containerId) {
     const chips = document.querySelectorAll(`${containerId} .chip.active`);
     return Array.from(chips).map(chip => chip.getAttribute('data-skill') || chip.innerText.trim());
   }
 
-  // Validation du formulaire
   function validateForm() {
     const nom = document.getElementById('nom').value.trim();
     const prenom = document.getElementById('prenom').value.trim();
@@ -281,8 +271,6 @@
     if(!terms) { showToast("Vous devez accepter les conditions générales", true); return false; }
     return true;
   }
-
-  // Simulation inscription
   function handleSubmit(e) {
     e.preventDefault();
     if(!validateForm()) return;
@@ -297,19 +285,16 @@
     const prenom = document.getElementById('prenom').value;
     const email = document.getElementById('email').value;
     
-    // Logique simulation inscription
     console.log("Inscription simulée", { nom, prenom, email, role, pointsForts, pointsFaibles });
-    
-    // Afficher un message de succès et rediriger vers accueil (simulation)
+  
     showToast(`🎉 Bienvenue ${prenom} ${nom} ! Votre compte ${role === "mentor" ? "Mentor" : "Mentoré"} a été créé. Redirection...`);
     setTimeout(() => {
       window.location.href = "mentorlink_accueil.html";
     }, 1800);
   }
 
-  // Ajout d'effet de remplissage automatique (démo dynamique)
   function demoFill() {
-    // optionnel pour l'expérience, préremplir des champs de démo
+  
     const urlParams = new URLSearchParams(window.location.search);
     if(urlParams.get('demo') === '1') {
       document.getElementById('nom').value = "Koffi";
@@ -318,7 +303,6 @@
     }
   }
 
-  // Initialisation complète
   document.addEventListener('DOMContentLoaded', () => {
     initChips();
     initRoleSelection();
@@ -327,7 +311,6 @@
     if(submitBtn) submitBtn.addEventListener('click', handleSubmit);
     demoFill();
 
-    // Amélioration: validation temps réel sur confirmation password
     const confirmInput = document.getElementById('confirmPassword');
     const passwordInput = document.getElementById('password');
     function checkMatch() {
