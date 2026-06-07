@@ -9,7 +9,7 @@
 </head>
 <body>
 
-<!-- NAV -->
+<!--NAV--> 
 <nav>
   <a class="logo" href="#">
     <div class="logo-icon">
@@ -22,27 +22,26 @@
     <li><a href="#avantages">Avantages</a></li>
   </ul>
   <div class="nav-cta">
-    <a href="mentorlink_connexion.html" class="btn-outline">Connexion</a>
-    <a href="etuinscri.html" class="btn-primary">
+    <a href="connexion.html" class="btn-outline">Connexion</a>
+   <a href="etuinscri.html" class="btn-white">  M'inscrire </a>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
       Rejoindre
     </a>
   </div>
 </nav>
 
-<!-- HERO -->
 <section class="hero">
   <div class="hero-content">
     <div class="hero-badge">La plateforme de mentorat des étudiants IFRI</div>
-    <h1>Trouve ton<br>mentor.<br><span>Sans attendre.</span></h1>
+    <h1>Trouve ton<br>mentor<br><span>Sans attendre.</span></h1>
     <p class="hero-sub">IFRIMentorLink connecte les étudiants de l'IFRI entre eux pour du soutien académique et professionnel. Un algorithme intelligent propose les meilleures correspondances.</p>
     
     <div class="hero-search">
       <input type="text" placeholder="Matière, compétence...">
       <select>
         <option>Toutes les filières</option>
-        <option>IA</option><option>IM</option><option>GL</option>
-        <option>SE&IoT</option><option>SI</option>
+        <option>Intelligence Artificielle</option><option>Internet et Multimedia</option><option>Génie Logiciel</option>
+        <option>Système Embarqués & Internet des Objet</option><option>Sécurité Informatique</option>
       </select>
       <button class="btn-search">Explorer</button>
     </div>
@@ -108,7 +107,7 @@
   </div>
 </section>
 
-<!-- STATS -->
+<!--STATS-->
 <div class="stats" id="mission">
   <div class="stat"><div class="stat-num">+200</div><div class="stat-label">Étudiants inscrits</div></div>
   <div class="stat"><div class="stat-num">+350</div><div class="stat-label">Sessions réalisées</div></div>
@@ -162,7 +161,7 @@
         <li>Messagerie pour organiser les sessions</li>
         <li>Suivi de mes progrès</li>
       </ul>
-      <a href="etuinscri.html" class="btn-white">M'inscrire comme mentoré</a>
+<a href="etuinscri.html?role=mentore"class="btn-white">M'inscrire comme mentoré</a>
     </div>
     <div class="profile-card">
       <div class="profile-role">🎓 JE SUIS MENTOR</div>
@@ -174,7 +173,7 @@
         <li>Accès aux demandes des étudiants</li>
         <li>Gestion de mes disponibilités</li>
       </ul>
-      <a href="etuinscri.html" class="btn-primary btn-lg" style="display:inline-block;margin-top:0">M'inscrire comme mentor</a>
+      <a href="etuinscri.html?role=mentor"class="btn-primary btn-lg">M'inscrire comme mentor</a>
     </div>
   </div>
 </section>
@@ -224,6 +223,6 @@
     <span>GROUPE 58 IFRI 2026</span>
   </div>
 </footer>
-
+<script src="script.js"></script>
 </body>
 </html>

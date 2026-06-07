@@ -10,7 +10,7 @@
 <body>
 
 <nav>
-  <a class="logo" href="mentorlink_accueil.html">
+  <a class="logo" href="index.html">
     <div class="logo-icon">
       <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     </div>
@@ -44,7 +44,7 @@
         <div class="perk-icon">📚</div>
         <div class="perk-text">
           <h4>Toutes les filières IFRI</h4>
-          <p>IA, IM, GL, SE&IoT, SI — tous les étudiants sont les bienvenus</p>
+          <p>Intelligence Artificielle, Internet et Multimedia, Génie Logiciel, SE&IoT, Sécurité Informatique — tous les étudiants sont les bienvenus</p>
         </div>
       </div>
     </div>
@@ -55,18 +55,17 @@
     <div class="form-title">Inscription</div>
     <div class="form-sub">Rejoins la communauté de mentorat de l'IFRI</div>
 
-  
-    <div class="section-divider">MON RÔLE</div>
-    <div class="role-select" id="roleSelectContainer">
-      <div class="role-card selected" data-role="mentore" id="roleMentore">
-        <h4>Je suis Mentoré</h4>
-        <p>Je cherche de l'aide</p>
-      </div>
-      <div class="role-card" data-role="mentor" id="roleMentor">
-        <h4>Je suis Mentor</h4>
-        <p>Je partage mes connaissances</p>
-      </div>
-    </div>
+  <h2 id="roleTitle">Choisissez votre profil</h2>
+
+<div id="roleSelection">
+  <div id="roleMentor" class="role-card" data-role="mentor">
+    JE SUIS MENTOR
+  </div>
+
+  <div id="roleMentore" class="role-card" data-role="mentore">
+    JE SUIS MENTORÉ
+  </div>
+</div>
 
  
     <div class="section-divider">INFORMATIONS PERSONNELLES</div>
@@ -111,10 +110,10 @@
         <select id="filiere">
           <option value="">Sélectionnez une filière</option>
           <option>Intelligence Artificielle (IA)</option>
-          <option>Ingénierie Mathématique (IM)</option>
+          <option>Internet et Multimedia (IM)</option>
           <option>Génie Logiciel (GL)</option>
-          <option>Systèmes Embarqués & IoT (SE&IoT)</option>
-          <option>Systèmes d'Information (SI)</option>
+          <option>Systèmes Embarqués & Internet des Objet (SE&IoT)</option>
+          <option>Sécurité Informatique (SI)</option>
         </select>
       </div>
     </div>
@@ -197,6 +196,7 @@
 </footer>
 
 <script>
+  let selectedRole = null;
   function initChips() {
     const allChips = document.querySelectorAll('.chip');
     allChips.forEach(chip => {
@@ -209,16 +209,39 @@
     this.classList.toggle('active');
   }
 
-  function initRoleSelection() {
-    const roleCards = document.querySelectorAll('.role-card');
-    roleCards.forEach(card => {
-      card.addEventListener('click', () => {
-        roleCards.forEach(c => c.classList.remove('selected'));
-        card.classList.add('selected');
-        showToast(`Profil ${card.querySelector('h4')?.innerText || (card.dataset.role === 'mentor' ? 'Mentor' : 'Mentoré')} sélectionné ✅`);
-      });
+function initRoleSelection() {
+  const roleCards = document.querySelectorAll('.role-card');
+  const roleSelection = document.getElementById('roleSelection');
+
+  roleCards.forEach(card => {
+    card.addEventListener('click', () => {
+
+      // sauvegarde du rôle
+      selectedRole = card.dataset.role;
+
+      // UI
+      roleCards.forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+
+      // on garde seulement le rôle choisi
+      if (selectedRole === "mentor") {
+        document.getElementById("roleMentore").style.display = "none";
+        document.getElementById("roleMentor").style.display = "block";
+      }
+
+      if (selectedRole === "mentore") {
+        document.getElementById("roleMentor").style.display = "none";
+        document.getElementById("roleMentore").style.display = "block";
+      }
+
+      roleSelection.classList.add("single");
+
+      showToast(
+        `Profil ${selectedRole === "mentor" ? "Mentor" : "Mentoré"} sélectionné ✅`
+      );
     });
-  }
+  });
+}
 
   function showToast(message, isError = false) {
     let existingToast = document.querySelector('.toast');
@@ -302,15 +325,41 @@
       document.getElementById('email').value = "ange@ifri.bj";
     }
   }
+ function setRoleFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const role = params.get("role");
+
+  if (!role) return;
+
+  const mentorCard = document.getElementById("roleMentor");
+  const mentoreCard = document.getElementById("roleMentore");
+
+  selectedRole = role;
+
+  if (role === "mentor") {
+    mentorCard.classList.add("selected");
+    mentoreCard.style.display = "none";
+  }
+
+  if (role === "mentore") {
+    mentoreCard.classList.add("selected");
+    mentorCard.style.display = "none";
+  }
+
+  document.getElementById("roleSelection").classList.add("single");
+}
 
   document.addEventListener('DOMContentLoaded', () => {
-    initChips();
-    initRoleSelection();
-    initPasswordToggle();
-    const submitBtn = document.getElementById('submitBtn');
-    if(submitBtn) submitBtn.addEventListener('click', handleSubmit);
-    demoFill();
+  initChips();
+  initRoleSelection();
+  initPasswordToggle();
 
+  setRoleFromURL(); 
+
+  const submitBtn = document.getElementById('submitBtn');
+  if(submitBtn) submitBtn.addEventListener('click', handleSubmit);
+
+  demoFill();
     const confirmInput = document.getElementById('confirmPassword');
     const passwordInput = document.getElementById('password');
     function checkMatch() {
