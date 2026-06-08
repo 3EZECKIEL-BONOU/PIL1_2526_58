@@ -1,5 +1,7 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
+
+Utilisateur = get_user_model()
 
 # ==========================================
 # 1. TRADUCTION DES ENUMS (LISTES DE CHOIX)
@@ -58,7 +60,7 @@ JOUR_CHOICES = [
 # ==========================================
 
 class Utilisateur(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    user = models.OneToOneField(Utilisateur, on_delete=models.CASCADE, related_name='profile')
     nom = models.CharField(max_length=100)
     prenom = models.CharField(max_length=100)
     email = models.EmailField(max_length=100, unique=True)
