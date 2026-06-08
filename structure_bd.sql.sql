@@ -1,5 +1,5 @@
-CREATE TYPE liste_filieres AS ENUM ('Génie Logiciel', 'Intelligence Artificielle', 'Internet et multimédia');
-CREATE TYPE liste_niveaux_etude AS ENUM ('License 1', 'License 2', 'License 3', 'Master 1', 'Master 2', 'Master 3');
+CREATE TYPE liste_filieres AS ENUM ('Génie Logiciel', 'Intelligence Artificielle', 'Internet et multimédia', 'Sécurité informatique', 'Système embarqué et Internet des objets' );
+CREATE TYPE liste_niveaux_etude AS ENUM ('Licence 1', 'Licence 2', 'Licence 3', 'Master 1', 'Master 2', 'Master 3');
 CREATE TYPE format_cours AS ENUM ('présentiel', 'en ligne');
 CREATE TYPE choix_annonce AS ENUM ('offre', 'demande');
 CREATE TYPE statut_reponse AS ENUM ('en attente', 'accepté', 'refusé'); 
