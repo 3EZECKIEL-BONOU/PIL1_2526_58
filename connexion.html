@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - IFRI MentorLink</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="connexion.css">
+</head>
+<body>
+
+<nav>
+    <a class="logo" href="#">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </div>
+    <span class="logo-text">IFRI<span>Mentor</span>Link</span>
+  </a>
+</nav>
+
+<section class="login-section">
+
+    <div class="login-card">
+
+        <div class="badge">CONNEXION</div>
+
+        <h1>Bon retour parmi nous</h1>
+
+        <p class="subtitle">
+            Connectez-vous pour accéder à votre espace mentorat.
+        </p>
+
+        <form action="dashbordetudiant.html" method="GET">
+
+            <div class="input-group">
+                <label>Email universitaire</label>
+                <input
+                    type="email"
+                    placeholder="exemple@ifri.uac.bj"
+                    name="email"
+                    required>
+            </div>
+
+            <div class="input-group">
+                <label>Mot de passe</label>
+                <input
+                    type="password"
+                    placeholder="********"
+                    name="password"
+                    required>
+            </div>
+
+            <button type="submit" class="btn-login">
+                Se connecter
+            </button>
+
+        </form>
+
+        <div style="margin-top: 25px; padding: 12px; border: 1px dashed #cbd5e1; border-radius: 8px; text-align: center; background-color: #f8fafc;">
+        <p style="font-size: 12px; color: #64748b; margin: 0 0 8px 0; font-family: sans-serif; font-weight: 600;">
+            🔧 Mode Démo Frontend (Vue Prof / Équipe) :
+        </p>
+        <a href="dashbordetudiant.html" style="font-size: 13px; color: #2563eb; text-decoration: none; font-weight: 500; margin-right: 15px;">
+            Accès Étudiant
+        </a>
+        <a href="dashbordmentor.html" style="font-size: 13px; color: #16a34a; text-decoration: none; font-weight: 500;">
+            Accès Mentor
+        </a>
+    </div>
+
+        <div class="separator">
+            <span>ou</span>
+        </div>
+
+        <p class="register-link">
+            Vous n'avez pas encore de compte ?
+            <a href="etuinscri.html">
+                S'inscrire
+            </a>
+        </p>
+
+    </div>
+
+</section>
+
+<script>
+function switchTab(el,tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tab-email').style.display=tab==='email'?'block':'none';
+  document.getElementById('tab-phone').style.display=tab==='phone'?'block':'none';
+}
+function togglePwd(){
+  const i=document.getElementById('pwd-in');
+  i.type=i.type==='password'?'text':'password';
+}
+function tryLogin(){
+  const e=document.getElementById('email-in').value;
+  const p=document.getElementById('pwd-in').value;
+  if(!e||!p){document.getElementById('err').classList.add('show');return;}
+  window.location.href='dashbordetudiant.html';
+}
+</script>
+
+</body>
+</html>
