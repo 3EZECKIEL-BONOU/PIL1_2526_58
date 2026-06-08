@@ -23,12 +23,12 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  max-width: 1250px;           /* ← Largeur maximale de la page */
-  margin: 0 auto;              /* ← Centre horizontalement */
-  padding: 10px
+  max-width: 1250px;           
+  margin: 0 auto;              
+  padding: 10px;
 }
 
-/* ========== NAVIGATION ========== */
+
 nav {
   display: flex;
   align-items: center;
@@ -92,14 +92,13 @@ nav {
   text-decoration: underline;
 }
 
-/* ========== MAIN LAYOUT ========== */
 main {
   display: grid;
   grid-template-columns: 1fr 1fr;
   flex: 1;
 }
 
-/* LEFT PANEL - BANDEAU MOTIVANT */
+
 .left-panel {
   background: var(--navy);
   padding: 60px 40px;
@@ -203,7 +202,7 @@ main {
   margin-bottom: 0;
 }
 
-/* RIGHT PANEL - FORMULAIRE */
+
 .right-panel {
   background: var(--white);
   padding: 48px 56px;
@@ -380,11 +379,21 @@ textarea {
   background: var(--blue-light);
 }
 
-.role-select {
+#roleSelection {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
   margin-bottom: 20px;
+}
+#roleSelection.single {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  align-items: center;
+}
+#roleSelection.single .role-card {
+  width: 60%;
+  max-width: 280px;
+  margin: 0 auto;
 }
 
 .role-card {
@@ -533,7 +542,7 @@ footer span {
   color: #fff;
 }
 
-/* TOAST NOTIFICATION */
+/TOAST NOTIFICATION /
 .toast {
   position: fixed;
   bottom: 24px;
@@ -563,7 +572,7 @@ footer span {
   }
 }
 
-/* RESPONSIVE */
+/ RESPONSIVE /
 @media (max-width: 900px) {
   main {
     grid-template-columns: 1fr;
