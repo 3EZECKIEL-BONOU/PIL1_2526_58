@@ -1,0 +1,36 @@
+body{
+  margin:0;
+  font-family:Arial;
+  display:flex;
+  background:#f4f7ff;
+}
+
+.sidebar{
+  width:220px;
+  height:100vh;
+  background:#1f4aa8;
+  color:white;
+  padding:20px;
+}
+
+.sidebar ul{
+  list-style:none;
+  padding:0;
+}
+
+.sidebar li{
+  padding:10px;
+  margin:5px 0;
+  background:rgba(255,255,255,0.1);
+}
+
+.main{
+  padding:20px;
+  width:100%;
+}
+
+.header{
+  background:white;
+  padding:15px;
+  border-radius:10px;
+}
