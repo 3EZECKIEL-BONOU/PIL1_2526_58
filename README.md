@@ -1,4 +1,4 @@
-Voici ton **guide d’utilisation niveau Licence 1 IFRI**, bien structuré, académique et intégrant correctement les membres du groupe.
+
 
 ---
 
