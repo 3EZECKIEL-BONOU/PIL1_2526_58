@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard</title>
+
+<link rel="stylesheet" href="Dashboard.css">
+</head>
+
+<body>
+
+<div class="sidebar">
+  <h2>IFRI MentorLink</h2>
+  <ul>
+    <li>Dashboard</li>
+    <li>Messages</li>
+    <li>Sessions</li>
+    <li>Paramètres</li>
+  </ul>
+</div>
+
+<div class="main">
+
+  <div class="header">
+    <h1 id="title">Dashboard</h1>
+  </div>
+
+  <div class="section">
+    <h2 id="roleDisplay"></h2>
+  </div>
+
+</div>
+
+<script>
+const role = localStorage.getItem("userRole");
+
+if(role === "mentor"){
+  document.getElementById("roleDisplay").innerText = "Espace Mentor 👨‍🏫";
+  document.getElementById("title").innerText = "Dashboard Mentor";
+}
+else{
+  document.getElementById("roleDisplay").innerText = "Espace Mentoré 🎓";
+  document.getElementById("title").innerText = "Dashboard Mentoré";
+}
+</script>
+
+</body>
+</html>
