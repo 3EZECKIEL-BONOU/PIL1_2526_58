@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Dashboard Mentor</title>
-<link rel="stylesheet" href="Dashboard.css">
+<link rel="stylesheet" href="dashboard.css">
 </head>
 
 <body>
@@ -23,7 +23,9 @@
 
     <!-- HEADER -->
     <div class="header">
-        <h1>👨‍🏫 Dashboard Mentor</h1>
+        <h1 id="welcome">👨‍🏫 Dashboard Mentor</h1>
+        <h3 id="=userName"></h3>
+        <p id="userRole"></p>
     </div>
 
     <!-- HERO -->
@@ -115,6 +117,39 @@
     </div>
 
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
 
+  const user = JSON.parse(localStorage.getItem("currentUser"));
+
+  if (!user) {
+    window.location.href = "connexion.html";
+    return;
+  }
+
+  document.getElementById("userName").textContent =
+    user.nom + " " + user.prenom;
+
+  document.addEventListener("DOMContentLoaded", () => {
+
+  const user = JSON.parse(localStorage.getItem("currentUser"));
+
+  if (!user) {
+    window.location.href = "connexion.html";
+    return;
+  }
+
+  document.getElementById("welcome").innerText =
+    "👨‍🏫 Dashboard Mentor";
+
+  document.getElementById("userName").innerText =
+    user.prenom + " " + user.nom;
+
+  document.getElementById("userRole").innerText =
+    "👨‍🏫 Mentor";
+});
+
+});
+</script>
 </body>
 </html>

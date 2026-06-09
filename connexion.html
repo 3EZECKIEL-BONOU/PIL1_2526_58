@@ -9,8 +9,10 @@
 
     <link rel="stylesheet" href="connexion.css">
 </head>
+
 <body>
 
+<!-- NAVBAR -->
 <nav>
     <a class="logo" href="index.html">
         <div class="logo-icon">👥</div>
@@ -20,6 +22,7 @@
     </a>
 </nav>
 
+<!-- LOGIN SECTION -->
 <section class="login-section">
 
     <div class="login-card">
@@ -32,44 +35,83 @@
             Connectez-vous pour accéder à votre espace mentorat.
         </p>
 
-        <form>
+        <!-- FORM -->
+        <form onsubmit="return false;">
 
+            <!-- EMAIL -->
             <div class="input-group">
                 <label>Email universitaire</label>
-                <input
-                    type="email"
-                    placeholder="exemple@ifri.uac.bj"
-                    required>
+                <input type="email" id="email"
+                       placeholder="exemple@ifri.uac.bj"
+                       required>
             </div>
 
+            <!-- PASSWORD -->
             <div class="input-group">
                 <label>Mot de passe</label>
-                <input
-                    type="password"
-                    placeholder="********"
-                    required>
+                <input type="password" id="password"
+                       placeholder="********"
+                       required>
             </div>
 
-            <button type="submit" class="btn-login">
+            <!-- ROLE -->
+            <div class="input-group">
+                <label>Je suis</label>
+                <select id="role" required>
+                    <option value="">-- Choisir un rôle --</option>
+                    <option value="mentor">Mentor</option>
+                    <option value="mentee">Mentoré</option>
+                </select>
+            </div>
+
+            <!-- BUTTON -->
+            <button type="button" class="btn-login" onclick="handleLogin()">
                 Se connecter
             </button>
 
         </form>
 
+        <!-- SEPARATOR -->
         <div class="separator">
             <span>ou</span>
         </div>
 
+        <!-- REGISTER -->
         <p class="register-link">
             Vous n'avez pas encore de compte ?
-            <a href="etuinscri.html">
-                S'inscrire
-            </a>
+            <a href="etuinscri.html">S'inscrire</a>
         </p>
 
     </div>
 
 </section>
+
+<!-- SCRIPT -->
+<script>
+function handleLogin() {
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const role = document.getElementById("role").value;
+
+    // Vérification simple 
+    if (!email || !password || !role) {
+        alert("Veuillez remplir tous les champs !");
+        return;
+    }
+
+    // Sauvegarde des infos utilisateur
+    localStorage.setItem("userEmail", email);
+    localStorage.setItem("userRole", role);
+
+    // Redirection selon rôle
+    if (role === "mentor") {
+        window.location.href = "dashboard-mentor.html";
+    } else {
+        window.location.href = "dashboard-mentee.html";
+    }
+}
+</script>
 
 </body>
 </html>

@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <title>Dashboard Mentoré</title>
-<link rel="stylesheet" href="Dashboard.css">
+<link rel="stylesheet" href="dashboard.css">
 </head>
 
 <body>
 
+<!-- SIDEBAR -->
 <div class="sidebar">
   <h2>IFRI MentorLink</h2>
   <ul>
@@ -19,11 +20,14 @@
   </ul>
 </div>
 
+<!-- MAIN -->
 <div class="main">
 
     <!-- HEADER -->
     <div class="header">
-        <h1>🎓 Dashboard Mentoré</h1>
+        <h1 id="welcome">🎓 Dashboard Mentoré</h1>
+        <h3 id="userName"></h3>
+        <p id="userRole"></p>
     </div>
 
     <!-- HERO -->
@@ -123,6 +127,32 @@
     </div>
 
 </div>
+
+<!-- SCRIPT UNIQUE ET PROPRE -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const user = JSON.parse(localStorage.getItem("currentUser"));
+
+  if (!user) {
+    window.location.href = "connexion.html";
+    return;
+  }
+
+  // Titre principal
+  document.getElementById("welcome").innerText =
+    "👋 Bienvenue " + user.prenom;
+
+  // Nom complet
+  document.getElementById("userName").innerText =
+    user.prenom + " " + user.nom;
+
+  // Rôle affiché proprement
+  document.getElementById("userRole").innerText =
+    user.role === "mentor" ? "👨‍🏫 Mentor" : "🎓 Mentoré";
+
+});
+</script>
 
 </body>
 </html>
