@@ -11,12 +11,14 @@ FILIERE_CHOICES = [
     ('Génie Logiciel', 'Génie Logiciel'),
     ('Intelligence Artificielle', 'Intelligence Artificielle'),
     ('Internet et multimédia', 'Internet et multimédia'),
+    ('Sécurité Informatique'),
+    ('Systèmes embarqués et Internet des objets'),
 ]
 
 NIVEAU_CHOICES = [
-    ('License 1', 'License 1'),
-    ('License 2', 'License 2'),
-    ('License 3', 'License 3'),
+    ('Licence 1', 'Licence 1'),
+    ('Licence 2', 'Licence 2'),
+    ('Licence 3', 'Licence 3'),
     ('Master 1', 'Master 1'),
     ('Master 2', 'Master 2'),
     ('Master 3', 'Master 3'),
