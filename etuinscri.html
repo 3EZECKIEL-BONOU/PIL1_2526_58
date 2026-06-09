@@ -293,29 +293,57 @@ function initRoleSelection() {
     if(password !== confirm) { showToast("Les mots de passe ne correspondent pas", true); return false; }
     if(!terms) { showToast("Vous devez accepter les conditions générales", true); return false; }
     return true;
+    if (!selectedRole) {
+        showToast("Veuillez choisir un rôle (Mentor ou Mentoré)", true);
+         return false;
+}
   }
   function handleSubmit(e) {
     e.preventDefault();
     if(!validateForm()) return;
-
-    const selectedRoleCard = document.querySelector('.role-card.selected');
-    let role = "mentore";
-    if(selectedRoleCard && selectedRoleCard.dataset.role === "mentor") role = "mentor";
-    
-    const pointsForts = getActiveChips('#pointsFortsChips');
+// Récupération des valeurs 
+   const pointsForts = getActiveChips('#pointsFortsChips');
     const pointsFaibles = getActiveChips('#pointsFaiblesChips');
     const nom = document.getElementById('nom').value;
     const prenom = document.getElementById('prenom').value;
     const email = document.getElementById('email').value;
-    
+    const telephone = document.getElementById('telephone').value;
+    const password = document.getElementById('password').value;
+// Role
+   let role = selectedRole || "mentee";
+   
+    if(selectedRoleCard &&selectedRoleCard.dataset.role === "mentor") role = "mentor";
+// Récupération des users
+    let users = JSON.parse(localStorage.getItem("users")) || [];
+//Ajout des users
+    users.push({
+        nom,
+        prenom,
+        email,
+        telephone,
+        password,
+        role,
+        pointsForts,
+        pointsFaibles,
+    });
+// Sauvegarde
+    localStorage.setItem("users", JSON.stringify(users));
+    localStorage.setItem("currentUser", JSON.stringify({
+       nom,
+       prenom,
+       email,
+       role
+      }));
+
     console.log("Inscription simulée", { nom, prenom, email, role, pointsForts, pointsFaibles });
   
     showToast(`🎉 Bienvenue ${prenom} ${nom} ! Votre compte ${role === "mentor" ? "Mentor" : "Mentoré"} a été créé. Redirection...`);
+// Redirection
     setTimeout(() => {
       if(role === "mentor"){
-    window.location.href = "mentor_dashboard.html";
+    window.location.href = "dashboard-mentor.html";
       }else{
-    window.location.href = "mentee_dashboard.html";
+    window.location.href = "dashboard-mentee.html";
       }
     }, 1800);
   }
@@ -346,9 +374,9 @@ function initRoleSelection() {
   }
 
   if (role === "mentore") {
-    mentoreCard.classList.add("selected");
-    mentorCard.style.display = "none";
-  }
+  mentoreCard.classList.add("selected");
+  mentorCard.style.display = "none";
+}
 
   document.getElementById("roleSelection").classList.add("single");
 }
