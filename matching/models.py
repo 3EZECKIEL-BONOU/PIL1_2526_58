@@ -11,8 +11,8 @@ FILIERE_CHOICES = [
     ('Génie Logiciel', 'Génie Logiciel'),
     ('Intelligence Artificielle', 'Intelligence Artificielle'),
     ('Internet et multimédia', 'Internet et multimédia'),
-    ('Sécurité Informatique'),
-    ('Systèmes embarqués et Internet des objets'),
+    ('Sécurité Informatique', 'Sécurité Informatique'),    
+    ('Systèmes embarqués et Internet des objets', 'Systèmes embarqués et Internet des objets'),
 ]
 
 NIVEAU_CHOICES = [
