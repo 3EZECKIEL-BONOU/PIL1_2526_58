@@ -3,8 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IFRI_MentorLink — Dashboard</title>
+<title>IFRI_MentorLink — Dashboard Mentoré</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!--
+  ════════════════════════════════════════════════════════════════
+  GUIDE D'INTÉGRATION DJANGO
+  ════════════════════════════════════════════════════════════════
+  Ce fichier est un template HTML pur.
+  Pour l'intégrer avec Django :
+
+  1. Renomme ce fichier en : dashboard_mentor.html
+  2. Place-le dans : templates/mentorlink/dashboard_mentor.html
+  3. En haut du fichier ajoute : {% extends "base.html" %} {% block content %}
+  4. Remplace les data-attributes par des variables Jinja2 :
+       data-nom=""  →  data-nom="{{ user.last_name }}"
+       data-prenom="" →  data-prenom="{{ user.first_name }}"
+       etc.
+  5. Pour la photo de profil : data-photo="{{ user.profile.photo.url|default:'' }}"
+  6. Les listes (demandes, sessions, mentorés) sont injectées via l'API REST Django
+     (fetch('/api/mentor/demandes/', ...)) — voir les fonctions fetchXxx() en bas du JS.
+  ════════════════════════════════════════════════════════════════
+-->
+
+<!--
+  DATA INJECTION POINT
+  Toutes les données de l'utilisateur connecté sont ici.
+  Django remplace ces valeurs via le contexte de la vue.
+-->
+<div id="user-data"
+  style="display:none"
+  data-nom=""
+  data-prenom=""
+  data-email=""
+  data-tel=""
+  data-filiere=""
+  data-niveau=""
+  data-bio=""
+  data-photo=""
+  data-role="mentore"
+  data-matieres='[]'
+  data-niveaux='["L1","L2","L3"]'
+  data-formats='["En ligne"]'
+  data-dispo-jours='["Lundi","Mercredi"]'
+  data-dispo-debut="14:00"
+  data-dispo-fin="17:00"
+></div>
+
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -14,10 +59,11 @@
   --green:#10B981;--green-light:#D1FAE5;
   --orange:#F59E0B;--orange-light:#FEF3C7;
   --red:#EF4444;--red-light:#FEE2E2;
+  --gold:#F59E0B;--gold-light:#FEF3C7;
 }
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
 
-/* ── TOPBAR ── */
+/* TOPBAR */
 .topbar{height:64px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;z-index:50}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none}
 .logo-icon{width:34px;height:34px;background:var(--blue);border-radius:9px;display:flex;align-items:center;justify-content:center}
@@ -27,119 +73,130 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .topbar-right{display:flex;align-items:center;gap:12px}
 .notif-btn{position:relative;width:36px;height:36px;border:1.5px solid var(--border);border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--bg)}
 .notif-btn svg{width:16px;height:16px;fill:none;stroke:var(--muted);stroke-width:1.8}
-.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--blue);border-radius:50%;border:1.5px solid var(--white);display:none}
+.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;background:var(--orange);border-radius:50%;border:1.5px solid var(--white);display:none}
 .notif-dot.show{display:block}
 .user-pill{display:flex;align-items:center;gap:9px;padding:5px 14px 5px 5px;border:1.5px solid var(--border);border-radius:24px;cursor:pointer;background:var(--bg)}
-.u-av{width:28px;height:28px;border-radius:50%;background:var(--blue-light);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.u-av{width:28px;height:28px;border-radius:50%;background:var(--gold-light);color:#92400E;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;overflow:hidden;flex-shrink:0}
+.u-av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .u-name{font-size:13px;font-weight:600}
-.u-role{background:var(--blue-light);color:var(--blue);font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.u-role{background:var(--gold-light);color:#92400E;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.mentor-badge-top{display:flex;align-items:center;gap:5px;background:var(--gold-light);border:1px solid var(--gold);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:#92400E}
 
-/* ── LAYOUT ── */
+/* LAYOUT */
 .body-layout{display:flex;flex:1;overflow:hidden}
 
-/* ── SIDEBAR ── */
+/* SIDEBAR */
 .sidebar{width:240px;background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
 .sidebar-inner{padding:16px 12px;display:flex;flex-direction:column;gap:2px;flex:1}
-
-/* groupe accordion */
-.nav-group{}
-.nav-group-trigger{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:9px;cursor:pointer;color:var(--muted);font-size:14px;font-weight:500;transition:.15s;user-select:none;width:100%;background:none;border:none;font-family:'DM Sans',sans-serif;text-align:left}
-.nav-group-trigger:hover{background:var(--bg);color:var(--text)}
-.nav-group-trigger.active{background:var(--blue-light);color:var(--blue);font-weight:600}
-.nav-group-trigger svg.icon{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;flex-shrink:0}
-.nav-group-trigger .arrow{margin-left:auto;width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;transition:transform .2s}
-.nav-group-trigger.open .arrow{transform:rotate(180deg)}
-.nav-group-trigger .nbadge{background:var(--blue);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:auto}
-.nav-group-trigger .nbadge.or{background:var(--orange)}
-
-/* sous-items */
-.nav-children{display:none;flex-direction:column;gap:1px;padding-left:28px;padding-top:2px}
-.nav-children.open{display:flex}
-.nav-child{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:.15s;user-select:none}
-.nav-child:hover{background:var(--bg);color:var(--text)}
-.nav-child.active{color:var(--blue);font-weight:600;background:var(--blue-light)}
-.nav-child svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8;flex-shrink:0}
-
-/* section label */
 .s-section{font-size:10px;font-weight:700;letter-spacing:1.2px;color:var(--muted);padding:16px 10px 6px;text-transform:uppercase}
-
-/* lien direct (pas accordion) */
-.nav-direct{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:9px;cursor:pointer;color:var(--muted);font-size:14px;font-weight:500;transition:.15s;user-select:none}
+.nav-direct{display:flex;align-items:center;gap:10px;padding:10px;border-radius:9px;cursor:pointer;color:var(--muted);font-size:14px;font-weight:500;transition:.15s;user-select:none}
 .nav-direct:hover{background:var(--bg);color:var(--text)}
-.nav-direct.active{background:var(--blue-light);color:var(--blue);font-weight:600}
+.nav-direct.active{background:var(--gold-light);color:#92400E;font-weight:600}
 .nav-direct svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;flex-shrink:0}
 .nav-direct.danger{color:var(--red)}
 .nav-direct.danger:hover{background:var(--red-light)}
-
+.nav-group-trigger{display:flex;align-items:center;gap:10px;padding:10px;border-radius:9px;cursor:pointer;color:var(--muted);font-size:14px;font-weight:500;transition:.15s;user-select:none;width:100%;background:none;border:none;font-family:'DM Sans',sans-serif;text-align:left}
+.nav-group-trigger:hover{background:var(--bg);color:var(--text)}
+.nav-group-trigger.active{background:var(--gold-light);color:#92400E;font-weight:600}
+.nav-group-trigger svg.icon{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;flex-shrink:0}
+.nav-group-trigger .arrow{margin-left:auto;width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;transition:transform .2s}
+.nav-group-trigger.open .arrow{transform:rotate(180deg)}
+.nbadge{background:var(--orange);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:auto}
+.nbadge.bl{background:var(--blue)}
+.nav-children{display:none;flex-direction:column;gap:1px;padding-left:28px;padding-top:2px}
+.nav-children.open{display:flex}
+.nav-child{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:.15s}
+.nav-child:hover{background:var(--bg);color:var(--text)}
+.nav-child.active{color:#92400E;font-weight:600;background:var(--gold-light)}
+.nav-child svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8;flex-shrink:0}
 .sidebar-footer{margin-top:auto;padding:12px;border-top:1px solid var(--border)}
 
-/* ── MAIN ── */
+/* MAIN */
 .main{flex:1;overflow-y:auto;padding:28px 32px}
-.section{display:none}
-.section.active{display:block}
-
-/* ── PAGE HEADER ── */
+.section{display:none}.section.active{display:block}
 .page-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--navy);margin-bottom:4px}
 .page-sub{font-size:14px;color:var(--muted);margin-bottom:24px}
-
-/* ── EMPTY STATE ── */
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center;background:var(--white);border:1px solid var(--border);border-radius:16px}
 .empty-icon{font-size:48px;margin-bottom:16px;opacity:.5}
 .empty-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--navy);margin-bottom:8px}
 .empty-sub{font-size:14px;color:var(--muted);max-width:320px;line-height:1.6;margin-bottom:20px}
 
-/* ── CARDS ── */
-.card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px}
-.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.card-title{font-size:15px;font-weight:700;color:var(--navy)}
-
-/* ── BUTTONS ── */
-.btn-blue{padding:9px 20px;background:var(--blue);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s;display:inline-flex;align-items:center;gap:6px}
-.btn-blue:hover{background:var(--blue-dark)}
-.btn-blue svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2.5}
-.btn-outline2{padding:8px 18px;background:var(--bg);color:var(--text);border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s}
-.btn-outline2:hover{border-color:var(--blue);color:var(--blue)}
-.btn-danger{padding:8px 18px;background:var(--red-light);color:var(--red);border:1.5px solid var(--red);border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s}
-
-/* ── ACCUEIL ── */
-.welcome{background:linear-gradient(135deg,var(--navy),#1A3A6B);border-radius:16px;padding:24px 28px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;position:relative;overflow:hidden}
-.welcome::before{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;background:radial-gradient(circle,rgba(26,92,255,.25),transparent 70%);pointer-events:none}
+/* WELCOME BANNER */
+.welcome{background:linear-gradient(135deg,#1A0A00,#3A2A00);border-radius:16px;padding:24px 28px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;position:relative;overflow:hidden}
+.welcome::before{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;background:radial-gradient(circle,rgba(245,158,11,.2),transparent 70%);pointer-events:none}
 .welcome h1{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:4px}
 .welcome p{font-size:13px;color:rgba(255,255,255,.55)}
 .welcome-btns{display:flex;gap:10px;flex-shrink:0}
-.btn-wh{padding:9px 18px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s}
-.btn-wh-fill{background:var(--blue);color:#fff;border:none}
-.btn-wh-fill:hover{background:var(--blue-dark)}
-.btn-wh-out{background:rgba(255,255,255,.1);color:#fff;border:1.5px solid rgba(255,255,255,.2)}
+.btn-gold{padding:9px 18px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;background:var(--gold);color:#fff;border:none;transition:.2s;display:inline-flex;align-items:center;gap:6px}
+.btn-gold:hover{background:#D97706}
+.btn-wh-out{padding:9px 18px;background:rgba(255,255,255,.1);color:#fff;border:1.5px solid rgba(255,255,255,.2);border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
 .btn-wh-out:hover{background:rgba(255,255,255,.2)}
 
+/* STATS */
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
 .sc{background:var(--white);border:1px solid var(--border);border-radius:13px;padding:16px;position:relative;overflow:hidden;cursor:pointer;transition:.15s}
-.sc:hover{box-shadow:0 4px 16px rgba(26,92,255,.1)}
+.sc:hover{box-shadow:0 4px 16px rgba(245,158,11,.1)}
 .sc::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:13px 13px 0 0}
-.sc.bl::after{background:var(--blue)}.sc.gr::after{background:var(--green)}.sc.or::after{background:var(--orange)}.sc.pu::after{background:#8B5CF6}
+.sc.go::after{background:var(--gold)}.sc.gr::after{background:var(--green)}.sc.bl::after{background:var(--blue)}.sc.pu::after{background:#8B5CF6}
 .sc-l{font-size:12px;color:var(--muted);margin-bottom:6px}
 .sc-v{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--navy);margin-bottom:4px}
-.sc-h{font-size:11px;font-weight:600;color:var(--blue)}
-.sc.gr .sc-h{color:var(--green)}.sc.or .sc-h{color:var(--orange)}.sc.pu .sc-h{color:#8B5CF6}
+.sc-h{font-size:11px;font-weight:600;color:var(--gold)}
+.sc.gr .sc-h{color:var(--green)}.sc.bl .sc-h{color:var(--blue)}.sc.pu .sc-h{color:#8B5CF6}
 
-.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+/* CARD */
+.card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:16px}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-size:15px;font-weight:700;color:var(--navy)}
+.card-link{font-size:12px;color:var(--blue);cursor:pointer;font-weight:600}
 
-/* ── MENTOR CARD (liste) ── */
-.match-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}
-.match-row:last-child{border-bottom:none;padding-bottom:0}
-.av{display:flex;align-items:center;justify-content:center;font-weight:700;border-radius:10px;flex-shrink:0}
-.av-b{background:#DBEAFE;color:#1E40AF}.av-g{background:#D1FAE5;color:#065F46}.av-p{background:#EDE9FE;color:#6D28D9}.av-o{background:#FEF3C7;color:#92400E}
-.mr-info{flex:1;min-width:0}
-.mr-name{font-size:14px;font-weight:600;margin-bottom:2px}
-.mr-sub{font-size:12px;color:var(--muted)}
-.score-pill{padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;flex-shrink:0}
-.sp-hi{background:var(--green-light);color:#166534}.sp-md{background:var(--orange-light);color:#92400E}
-.abtn{padding:6px 12px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid;font-family:'DM Sans',sans-serif;transition:.15s;flex-shrink:0}
+/* BUTTONS */
+.btn-blue{padding:9px 20px;background:var(--blue);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s;display:inline-flex;align-items:center;gap:6px}
+.btn-blue:hover{background:var(--blue-dark)}
+.btn-outline2{padding:8px 18px;background:var(--bg);color:var(--text);border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.2s}
+.btn-outline2:hover{border-color:var(--blue);color:var(--blue)}
+.btn-danger{padding:8px 18px;background:var(--red-light);color:var(--red);border:1.5px solid var(--red);border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+.abtn{padding:6px 12px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid;font-family:'DM Sans',sans-serif;transition:.15s}
+.ab-go{background:var(--gold);color:#fff;border-color:var(--gold)}.ab-go:hover{background:#D97706}
 .ab-bl{background:var(--blue);color:#fff;border-color:var(--blue)}.ab-bl:hover{background:var(--blue-dark)}
+.ab-rd{background:var(--red-light);color:var(--red);border-color:var(--red)}
 .ab-gh{background:var(--bg);color:var(--text);border-color:var(--border)}.ab-gh:hover{border-color:var(--blue);color:var(--blue)}
 
-/* ── MESSAGERIE ── */
+/* AVATARS */
+.av{display:flex;align-items:center;justify-content:center;font-weight:700;border-radius:10px;flex-shrink:0;overflow:hidden}
+.av img{width:100%;height:100%;object-fit:cover}
+.av-b{background:#DBEAFE;color:#1E40AF}.av-g{background:#D1FAE5;color:#065F46}.av-p{background:#EDE9FE;color:#6D28D9}.av-o{background:#FEF3C7;color:#92400E}
+
+/* STATUS PILLS */
+.sp{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;flex-shrink:0}
+.sp-ok{background:var(--green-light);color:#166534}.sp-att{background:var(--orange-light);color:#92400E}.sp-done{background:var(--bg);color:var(--muted);border:1px solid var(--border)}
+
+/* DEMANDES */
+.dem-list{display:flex;flex-direction:column;gap:12px}
+.dem-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px}
+.dem-card.new-dem{border-left:3px solid var(--orange)}
+.dem-etudiant{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.dem-name{font-size:15px;font-weight:700;color:var(--navy)}
+.dem-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.dem-matiere{display:inline-flex;align-items:center;gap:5px;background:var(--gold-light);color:#92400E;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700;margin-bottom:8px}
+.dem-desc{font-size:13px;color:var(--text);padding:10px;background:var(--bg);border-radius:8px;line-height:1.6;margin-bottom:10px}
+.dem-foot{display:flex;align-items:center;gap:8px}
+.dem-time{font-size:11px;color:var(--muted);flex:1}
+
+/* MENTORÉS ACTIFS */
+.mentore-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.mentore-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px;transition:.2s}
+.mentore-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.mc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.mc-av{width:50px;height:50px;border-radius:12px;font-size:15px}
+.mc-name{font-size:15px;font-weight:700;margin-bottom:2px}
+.mc-sub{font-size:12px;color:var(--muted);margin-bottom:10px}
+.mc-besoins{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.mchip{padding:3px 9px;background:var(--gold-light);color:#92400E;border-radius:20px;font-size:11px;font-weight:600}
+.mc-pbar{height:5px;background:var(--bg);border-radius:3px;overflow:hidden}
+.mc-pfill{height:100%;background:var(--green);border-radius:3px}
+.mc-actions{display:flex;gap:7px;margin-top:10px}
+
+/* MESSAGERIE */
 .chat-layout{display:grid;grid-template-columns:260px 1fr;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--white);height:calc(100vh - 180px)}
 .conv-list{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
 .conv-search-wrap{padding:12px;border-bottom:1px solid var(--border);flex-shrink:0}
@@ -148,23 +205,17 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .conv-search input{border:none;outline:none;font-size:13px;font-family:'DM Sans',sans-serif;background:transparent;flex:1}
 .conv-items{overflow-y:auto;flex:1}
 .conv-item{display:flex;align-items:center;gap:10px;padding:13px 12px;cursor:pointer;border-bottom:1px solid var(--border);transition:.15s}
-.conv-item:hover{background:var(--bg)}
-.conv-item.active{background:var(--blue-light)}
+.conv-item:hover{background:var(--bg)}.conv-item.active{background:var(--gold-light)}
 .conv-body{flex:1;min-width:0}
 .conv-head{display:flex;justify-content:space-between;margin-bottom:3px}
-.conv-name{font-size:13px;font-weight:600}
-.conv-time{font-size:11px;color:var(--muted)}
+.conv-name{font-size:13px;font-weight:600}.conv-time{font-size:11px;color:var(--muted)}
 .conv-prev{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.conv-item.unread .conv-name{color:var(--blue)}
-.udot{width:7px;height:7px;background:var(--blue);border-radius:50%;flex-shrink:0}
-.conv-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 16px;text-align:center;flex:1}
-.conv-empty p{font-size:13px;color:var(--muted);line-height:1.5}
-
+.conv-item.unread .conv-name{color:var(--orange)}
+.udot{width:7px;height:7px;background:var(--orange);border-radius:50%;flex-shrink:0}
 .chat-zone{display:flex;flex-direction:column;overflow:hidden}
 .chat-no-select{display:flex;align-items:center;justify-content:center;flex:1;flex-direction:column;gap:10px;color:var(--muted)}
 .chat-no-select svg{width:40px;height:40px;opacity:.3}
 .chat-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0}
-.chat-header-info{flex:1}
 .chat-header-name{font-size:15px;font-weight:700}
 .chat-header-status{font-size:12px;color:var(--green)}
 .chat-messages{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:10px}
@@ -172,125 +223,100 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .msg-bubble.me{align-self:flex-end;align-items:flex-end}
 .msg-bubble.other{align-self:flex-start}
 .bubble{padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.5}
-.msg-bubble.me .bubble{background:var(--blue);color:#fff;border-radius:14px 14px 4px 14px}
+.msg-bubble.me .bubble{background:var(--gold);color:#fff;border-radius:14px 14px 4px 14px}
 .msg-bubble.other .bubble{background:var(--bg);border:1px solid var(--border);border-radius:14px 14px 14px 4px}
 .btime{font-size:10px;color:var(--muted);margin-top:3px}
 .chat-input-area{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center;flex-shrink:0}
 .chat-input-area input{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:24px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;background:var(--bg);transition:.2s}
-.chat-input-area input:focus{border-color:var(--blue);background:var(--white)}
-.send-btn{width:38px;height:38px;background:var(--blue);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:.2s}
-.send-btn:hover{background:var(--blue-dark)}
+.chat-input-area input:focus{border-color:var(--gold);background:var(--white)}
+.send-btn{width:38px;height:38px;background:var(--gold);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:.2s}
+.send-btn:hover{background:#D97706}
 .send-btn svg{width:15px;height:15px;fill:none;stroke:#fff;stroke-width:2.5}
 
-/* ── SESSIONS ── */
-.stabs{display:flex;gap:4px;background:var(--bg);border-radius:10px;padding:4px;margin-bottom:20px;width:fit-content;border:1px solid var(--border)}
-.stab{padding:7px 18px;border:none;border-radius:8px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;background:transparent;font-family:'DM Sans',sans-serif;transition:.2s}
-.stab.active{background:var(--white);color:var(--blue);box-shadow:0 1px 4px rgba(0,0,0,.08)}
-.sub-pane{display:none}.sub-pane.active{display:block}
+/* SESSIONS */
 .sess-list{display:flex;flex-direction:column;gap:10px}
 .sess-row{display:flex;align-items:center;gap:14px;background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px 18px;transition:.15s}
 .sess-row:hover{box-shadow:0 2px 12px rgba(0,0,0,.06)}
 .sess-dt{text-align:center;flex-shrink:0;width:44px}
-.sd-day{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--blue);line-height:1}
+.sd-day{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--gold);line-height:1}
 .sd-mo{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
 .sess-info{flex:1}
 .sess-title{font-size:14px;font-weight:700;margin-bottom:2px}
 .sess-meta{font-size:12px;color:var(--muted)}
-.sp{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;flex-shrink:0}
-.sp-ok{background:var(--green-light);color:#166534}.sp-att{background:var(--orange-light);color:#92400E}.sp-done{background:var(--bg);color:var(--muted);border:1px solid var(--border)}
 .sess-actions{display:flex;gap:7px;flex-shrink:0}
 
-/* ── PROGRESSION ── */
-.prog-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
-.pstat{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
-.pstat-num{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--blue)}
-.pstat-label{font-size:11px;color:var(--muted);margin-top:2px}
-.prog-list{display:flex;flex-direction:column;gap:14px}
-.prog-item{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px}
-.prog-item-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
-.prog-matiere{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:2px}
-.prog-by{font-size:12px;color:var(--muted)}
-.prog-pct{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--blue)}
-.pbar{height:7px;background:var(--bg);border-radius:4px;overflow:hidden;border:1px solid var(--border);margin-bottom:12px}
-.pfill{height:100%;border-radius:4px}
-.pfill-bl{background:linear-gradient(90deg,var(--blue),#60A5FA)}
-.pfill-gr{background:linear-gradient(90deg,var(--green),#34D399)}
-.pfill-or{background:linear-gradient(90deg,var(--orange),#FCD34D)}
-.prog-notes{display:flex;flex-direction:column;gap:6px}
-.pnote{font-size:12px;color:var(--text);padding:6px 10px;background:var(--bg);border-radius:7px;display:flex;justify-content:space-between}
-.pnote-status{font-weight:600;font-size:11px}
-.pnote-ok{color:var(--green)}.pnote-mid{color:var(--orange)}.pnote-bad{color:var(--red)}
+/* OFFRES */
+.offre-list{display:flex;flex-direction:column;gap:12px}
+.offre-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px}
+.offre-card.active-off{border-left:3px solid var(--gold)}
+.offre-mat{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:3px}
+.offre-meta{font-size:12px;color:var(--muted)}
+.offre-desc{font-size:13px;color:var(--text);padding:10px;background:var(--bg);border-radius:8px;line-height:1.6;margin-bottom:10px}
+.offre-foot{display:flex;align-items:center;gap:8px}
+.offre-resp{font-size:12px;font-weight:600;color:var(--gold);flex:1}
 
-/* ── DEMANDES ── */
-.dem-list{display:flex;flex-direction:column;gap:12px}
-.dem-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px}
-.dem-card.bl-left{border-left:3px solid var(--blue)}
-.dem-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
-.dem-mat{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:3px}
-.dem-meta{font-size:12px;color:var(--muted)}
-.dem-desc{font-size:13px;color:var(--text);line-height:1.6;padding:10px;background:var(--bg);border-radius:8px;margin-bottom:10px}
-.dem-foot{display:flex;align-items:center;gap:10px}
-.dem-resp{font-size:12px;font-weight:600;color:var(--blue);flex:1}
-.dem-actions{display:flex;gap:7px}
-
-/* ── PROFIL ── */
+/* ────────────────────────────────────
+   PROFIL — PHOTO UPLOAD
+──────────────────────────────────── */
 .profil-grid{display:grid;grid-template-columns:220px 1fr;gap:18px}
 .profil-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:22px;text-align:center;height:fit-content}
-.pav{width:68px;height:68px;border-radius:50%;background:var(--blue-light);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;margin:0 auto 8px;border:3px solid var(--white);box-shadow:0 0 0 3px var(--blue-light)}
+
+/* Zone photo avec overlay au survol */
+.pav-wrap{position:relative;width:80px;height:80px;margin:0 auto 8px;cursor:pointer}
+.pav{width:80px;height:80px;border-radius:50%;background:var(--gold-light);color:#92400E;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;border:3px solid var(--white);box-shadow:0 0 0 3px var(--gold-light);overflow:hidden;transition:.2s}
+.pav img{width:100%;height:100%;object-fit:cover}
+.pav-overlay{position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;opacity:0;transition:.2s;pointer-events:none}
+.pav-wrap:hover .pav-overlay{opacity:1}
+.pav-overlay svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:2}
+input#photoInput{display:none}
+
 .pname{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--navy);margin-bottom:3px}
 .psub{font-size:12px;color:var(--muted);margin-bottom:14px}
+.mentor-badge-card{background:var(--gold-light);border:1px solid var(--gold);border-radius:10px;padding:10px;margin-bottom:14px}
+.mbc-label{font-size:11px;font-weight:700;color:#92400E}
+.mbc-val{font-size:12px;color:var(--muted);margin-top:2px}
 .pbar2{height:5px;background:var(--bg);border-radius:3px;overflow:hidden;margin-bottom:5px}
-.pfill2{height:100%;background:var(--orange);border-radius:3px}
+.pfill2{height:100%;background:var(--gold);border-radius:3px}
 .pbar2-label{font-size:11px;color:var(--muted);text-align:left}
 .pstats{display:flex;justify-content:space-around;border-top:1px solid var(--border);margin-top:14px;padding-top:14px}
 .pst{display:flex;flex-direction:column;align-items:center;gap:2px}
-.pst-n{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--blue)}
+.pst-n{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--gold)}
 .pst-l{font-size:10px;color:var(--muted)}
-.btn-upload{padding:5px 12px;font-size:11px;font-weight:600;background:var(--bg);border:1.5px solid var(--border);border-radius:20px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:8px;display:block;width:100%}
-
 .profil-forms{}
 .pform-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:14px}
 .pform-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .pform-title{font-size:14px;font-weight:700;color:var(--navy)}
 .btn-edit-sm{padding:5px 12px;font-size:11px;font-weight:600;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif}
-.btn-edit-sm:hover{border-color:var(--blue);color:var(--blue)}
+.btn-edit-sm:hover{border-color:var(--gold);color:#92400E}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .fgroup{display:flex;flex-direction:column;gap:4px}
 .fgroup label{font-size:11px;font-weight:700;letter-spacing:.4px;color:var(--text)}
 .fgroup input,.fgroup select,.fgroup textarea{padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--bg);outline:none;color:var(--text);transition:.2s;width:100%}
-.fgroup input:focus,.fgroup select:focus,.fgroup textarea:focus{border-color:var(--blue);background:var(--white)}
+.fgroup input:focus,.fgroup select:focus,.fgroup textarea:focus{border-color:var(--gold);background:var(--white)}
 .fgroup textarea{resize:none;height:72px}
 .chips-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-.chip{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--blue-light);background:var(--white);color:var(--blue);transition:.2s}
-.chip:hover{background:var(--blue-light)}
-.chip.red{color:var(--red);border-color:var(--red-light)}
+.chip{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--gold-light);background:var(--white);color:#92400E;transition:.2s}
+.chip:hover{background:var(--gold-light)}
 .chip.add{color:var(--muted);border-color:var(--border);border-style:dashed}
 .dispo-days{display:flex;gap:6px;flex-wrap:wrap}
 .dday{padding:6px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);transition:.2s}
-.dday.active{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.dday.active{border-color:var(--gold);color:#92400E;background:var(--gold-light)}
+.format-grid{display:flex;gap:8px;flex-wrap:wrap}
+.fformat{padding:7px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;color:var(--muted);transition:.2s}
+.fformat.active{border-color:var(--gold);color:#92400E;background:var(--gold-light)}
 
-/* ── EXPLORER ── */
-.explore-bar{display:flex;gap:10px;background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:8px;margin-bottom:16px;align-items:center}
-.eb-input{display:flex;align-items:center;gap:8px;flex:1;padding:0 6px}
-.eb-input svg{width:15px;height:15px;fill:none;stroke:var(--muted);stroke-width:1.8;flex-shrink:0}
-.eb-input input{border:none;outline:none;font-size:14px;font-family:'DM Sans',sans-serif;background:transparent;width:100%}
-.eb-sel{border:none;outline:none;font-size:13px;color:var(--muted);background:transparent;padding:0 8px;border-left:1px solid var(--border);height:32px;cursor:pointer;font-family:'DM Sans',sans-serif}
-.filter-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px}
-.fchip{padding:5px 14px;border:1.5px solid var(--border);border-radius:20px;font-size:12px;cursor:pointer;transition:.2s;background:var(--white);color:var(--muted)}
-.fchip:hover,.fchip.active{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
-.mentor-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.mcard{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:18px;transition:.2s}
-.mcard:hover{box-shadow:0 4px 18px rgba(26,92,255,.1);border-color:var(--blue-light)}
-.mcard-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
-.mcard-av{width:48px;height:48px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
-.mcard-score{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--blue)}
-.mcard-name{font-size:15px;font-weight:700;margin-bottom:2px}
-.mcard-sub{font-size:12px;color:var(--muted);margin-bottom:10px}
-.mcard-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
-.mchip{padding:3px 9px;background:var(--blue-light);color:var(--blue);border-radius:20px;font-size:11px;font-weight:600}
-.mcard-dispo{font-size:12px;color:var(--muted);margin-bottom:12px}
+/* STATS DETAIL */
+.stats-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.stat-detail-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:20px}
+.prog-bar-item{margin-bottom:14px}
+.pb-head{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px}
+.pb-name{font-weight:600}
+.pb-pct{font-weight:700;color:var(--gold)}
+.pbar{height:7px;background:var(--bg);border-radius:4px;overflow:hidden;border:1px solid var(--border)}
+.pfill-go{background:linear-gradient(90deg,var(--gold),#FCD34D)}
+.pfill-gr{background:linear-gradient(90deg,var(--green),#34D399)}
 
-/* ── PARAMS ── */
+/* PARAMS */
 .params-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .param-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
 .param-row:last-child{border-bottom:none}
@@ -298,30 +324,29 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 .pr-s{font-size:12px;color:var(--muted)}
 .toggle{width:40px;height:22px;background:var(--border);border-radius:11px;cursor:pointer;position:relative;transition:.2s;flex-shrink:0}
 .toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-.toggle.on{background:var(--blue)}
+.toggle.on{background:var(--gold)}
 .toggle.on::after{left:calc(100% - 19px)}
 
-/* ── MODAL ── */
+/* MODAL */
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:none;align-items:center;justify-content:center}
 .overlay.show{display:flex}
-.modal{background:var(--white);border-radius:16px;padding:26px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,.15);animation:modalIn .2s ease}
+.modal{background:var(--white);border-radius:16px;padding:26px;width:100%;max-width:500px;box-shadow:0 20px 60px rgba(0,0,0,.15);animation:modalIn .2s ease}
 @keyframes modalIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
 .modal-head h3{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--navy)}
-.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);line-height:1}
-.modal-close:hover{color:var(--text)}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)}
 .modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
 .fgroup-full{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
 .fgroup-full label{font-size:11px;font-weight:700;letter-spacing:.4px;color:var(--text)}
 .fgroup-full input,.fgroup-full select,.fgroup-full textarea{padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--bg);outline:none;color:var(--text);transition:.2s;width:100%}
-.fgroup-full input:focus,.fgroup-full select:focus,.fgroup-full textarea:focus{border-color:var(--blue);background:var(--white)}
+.fgroup-full input:focus,.fgroup-full select:focus,.fgroup-full textarea:focus{border-color:var(--gold);background:var(--white)}
 .fgroup-full textarea{resize:none;height:80px}
 
-/* scrollbar */
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;transform:translateY(80px);opacity:0;transition:.3s;z-index:300;pointer-events:none}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-::-webkit-scrollbar-thumb:hover{background:var(--muted)}
 </style>
 </head>
 <body>
@@ -329,73 +354,67 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 <!-- TOPBAR -->
 <header class="topbar">
   <a class="logo" href="index.html">
-    <div class="logo-icon">
-      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    </div>
+    <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
     <span class="logo-text">IFRI<span>Mentor</span>Link</span>
   </a>
   <div class="topbar-right">
-    <div class="notif-btn" id="notif-btn" onclick="goTo('messagerie')">
+    <div class="mentor-badge-top" style="background:var(--blue-light);border-color:var(--blue);color:var(--blue)">📚 Mentoré IFRI</div>
+    <div class="notif-btn" onclick="goTo('messagerie')">
       <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <div class="notif-dot" id="notif-dot"></div>
     </div>
     <div class="user-pill" onclick="goTo('profil')">
       <div class="u-av" id="topbar-av"></div>
       <span class="u-name" id="topbar-name"></span>
-      <span class="u-role">Mentoré</span>
+      <span class="u-role" style="background:var(--blue-light);color:var(--blue)">Mentoré</span>
     </div>
   </div>
 </header>
 
 <div class="body-layout">
-
 <!-- SIDEBAR -->
 <aside class="sidebar">
 <div class="sidebar-inner">
-
-  <!-- Accueil direct -->
   <div class="nav-direct active" id="nav-accueil" onclick="goTo('accueil')">
     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
     Tableau de bord
   </div>
-
-  <!-- Groupe : Mentorat -->
   <div class="s-section">Mentorat</div>
-
   <div class="nav-group">
-    <button class="nav-group-trigger" id="trig-mentors" onclick="toggleGroup('mentors')">
-      <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      Mentors
-      <span class="nbadge" id="badge-mentors">0</span>
+    <button class="nav-group-trigger" id="trig-demandes" onclick="toggleGroup('demandes')">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+      Demandes reçues
+      <span class="nbadge" id="badge-dem" style="display:none">0</span>
       <svg class="arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
-    <div class="nav-children" id="children-mentors">
-      <div class="nav-child" onclick="goTo('mes-mentors')">
-        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Mes mentors
-      </div>
-      <div class="nav-child" onclick="goTo('explorer')">
-        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        Explorer
-      </div>
+    <div class="nav-children" id="children-demandes">
+      <div class="nav-child" onclick="goTo('demandes-nouvelles')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Nouvelles</div>
+      <div class="nav-child" onclick="goTo('demandes-acceptees')"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Acceptées</div>
     </div>
   </div>
-
+  <div class="nav-group">
+    <button class="nav-group-trigger" id="trig-mentores" onclick="toggleGroup('mentores')">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Mes mentorés
+      <span class="nbadge bl" id="badge-mentores">0</span>
+      <svg class="arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="nav-children" id="children-mentores">
+      <div class="nav-child" onclick="goTo('mentores-actifs')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Actifs</div>
+      <div class="nav-child" onclick="goTo('progression-mentores')"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Progression</div>
+    </div>
+  </div>
   <div class="nav-group">
     <button class="nav-group-trigger" id="trig-messagerie" onclick="toggleGroup('messagerie')">
       <svg class="icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       Messagerie
-      <span class="nbadge or" id="badge-msg" style="display:none">0</span>
+      <span class="nbadge" id="badge-msg" style="display:none">0</span>
       <svg class="arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
     <div class="nav-children" id="children-messagerie">
-      <div class="nav-child" onclick="goTo('messagerie')">
-        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        Conversations
-      </div>
+      <div class="nav-child" onclick="goTo('messagerie')"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Conversations</div>
     </div>
   </div>
-
   <div class="nav-group">
     <button class="nav-group-trigger" id="trig-sessions" onclick="toggleGroup('sessions')">
       <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -403,252 +422,156 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
       <svg class="arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
     <div class="nav-children" id="children-sessions">
-      <div class="nav-child" onclick="goTo('sessions-upcoming')">
-        <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        À venir
-      </div>
-      <div class="nav-child" onclick="goTo('sessions-done')">
-        <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        Passées
-      </div>
+      <div class="nav-child" onclick="goTo('sessions-upcoming')"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>À venir</div>
+      <div class="nav-child" onclick="goTo('sessions-done')"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Passées</div>
     </div>
   </div>
-
-  <!-- Groupe : Progression -->
-  <div class="s-section">Progression</div>
-
   <div class="nav-group">
-    <button class="nav-group-trigger" id="trig-progression" onclick="toggleGroup('progression')">
-      <svg class="icon" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      Progression
+    <button class="nav-group-trigger" id="trig-offres" onclick="toggleGroup('offres')">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Mes offres
       <svg class="arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
-    <div class="nav-children" id="children-progression">
-      <div class="nav-child" onclick="goTo('progression')">
-        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        Mes progrès
-      </div>
-      <div class="nav-child" onclick="goTo('demandes')">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        Mes demandes
-      </div>
+    <div class="nav-children" id="children-offres">
+      <div class="nav-child" onclick="goTo('offres')"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Mes offres publiées</div>
     </div>
   </div>
-
-  <!-- Compte -->
   <div class="s-section">Compte</div>
-  <div class="nav-direct" id="nav-profil" onclick="goTo('profil')">
-    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-    Mon profil
-  </div>
-  <div class="nav-direct" id="nav-parametres" onclick="goTo('parametres')">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
-    Paramètres
-  </div>
-
+  <div class="nav-direct" id="nav-profil" onclick="goTo('profil')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Mon profil</div>
+  <div class="nav-direct" id="nav-statistiques" onclick="goTo('statistiques')"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Statistiques</div>
+  <div class="nav-direct" id="nav-parametres" onclick="goTo('parametres')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>Paramètres</div>
   <div class="sidebar-footer">
-    <div class="nav-direct danger" onclick="confirmLogout()">
-      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      Déconnexion
-    </div>
+    <div class="nav-direct danger" onclick="confirmLogout()"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Déconnexion</div>
   </div>
 </div>
 </aside>
 
-<!-- MAIN CONTENT -->
+<!-- MAIN -->
 <main class="main" id="main-content">
 
-  <!-- ══ ACCUEIL ══ -->
+  <!-- ACCUEIL -->
   <div id="sec-accueil" class="section active">
     <div class="welcome">
       <div>
-        <h1 id="welcome-title">👋 Bonjour !</h1>
-        <p id="welcome-sub">Voici un aperçu de votre activité</p>
+        <h1 id="welcome-title">👋 Bonjour Mentor !</h1>
+        <p id="welcome-sub">Voici un aperçu de ton activité de mentorat</p>
       </div>
       <div class="welcome-btns">
-        <button class="btn-wh btn-wh-out" onclick="goTo('explorer')">Explorer les mentors</button>
-        <button class="btn-wh btn-wh-fill" onclick="openModal('modal-demande')">
-          + Nouvelle demande
-        </button>
+        <button class="btn-wh-out" onclick="goTo('offres');setTimeout(()=>openModal('modal-offre'),100)">+ Publier une offre</button>
+        <button class="btn-gold" onclick="goTo('demandes-nouvelles')">Voir les demandes</button>
       </div>
     </div>
-
     <div class="stats-row">
-      <div class="sc bl" onclick="goTo('mes-mentors')">
-        <div class="sc-l">Mentors actifs</div>
-        <div class="sc-v" id="stat-mentors">0</div>
-        <div class="sc-h">Voir mes mentors →</div>
-      </div>
-      <div class="sc gr" onclick="goTo('sessions-done')">
-        <div class="sc-l">Sessions réalisées</div>
-        <div class="sc-v" id="stat-sessions">0</div>
-        <div class="sc-h">Voir l'historique →</div>
-      </div>
-      <div class="sc or" onclick="goTo('messagerie')">
-        <div class="sc-l">Messages non lus</div>
-        <div class="sc-v" id="stat-messages">0</div>
-        <div class="sc-h" id="stat-msg-hint">Aucun message en attente</div>
-      </div>
-      <div class="sc pu" onclick="goTo('profil')">
-        <div class="sc-l">Profil complété</div>
-        <div class="sc-v" id="stat-profil">0%</div>
-        <div class="sc-h">Compléter →</div>
-      </div>
+      <div class="sc go" onclick="goTo('demandes-nouvelles')"><div class="sc-l">Demandes en attente</div><div class="sc-v" id="stat-demandes">0</div><div class="sc-h">Voir les demandes →</div></div>
+      <div class="sc gr" onclick="goTo('mentores-actifs')"><div class="sc-l">Mentorés actifs</div><div class="sc-v" id="stat-mentores">0</div><div class="sc-h">Voir mes mentorés →</div></div>
+      <div class="sc bl" onclick="goTo('sessions-upcoming')"><div class="sc-l">Sessions à venir</div><div class="sc-v" id="stat-sessions">0</div><div class="sc-h">Voir le planning →</div></div>
+      <div class="sc pu" onclick="goTo('statistiques')"><div class="sc-l">Sessions réalisées</div><div class="sc-v" id="stat-done">0</div><div class="sc-h">Voir les stats →</div></div>
     </div>
-
-    <div class="dash-grid">
-      <!-- correspondances -->
-      <div class="card">
-        <div class="card-head">
-          <span class="card-title">🎯 Meilleures correspondances</span>
-          <span class="card-title" style="font-size:12px;font-weight:600;color:var(--blue);cursor:pointer" onclick="goTo('explorer')">Voir tout →</span>
-        </div>
-        <div id="dash-matches"></div>
-      </div>
-      <!-- sessions à venir -->
-      <div class="card">
-        <div class="card-head">
-          <span class="card-title">📅 Prochaines sessions</span>
-          <span class="card-title" style="font-size:12px;font-weight:600;color:var(--blue);cursor:pointer" onclick="goTo('sessions-upcoming')">Voir tout →</span>
-        </div>
-        <div id="dash-sessions"></div>
-      </div>
+    <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:16px">
+      <div class="card"><div class="card-head"><span class="card-title">📥 Dernières demandes reçues</span><span class="card-link" onclick="goTo('demandes-nouvelles')">Voir tout →</span></div><div id="dash-demandes"></div></div>
+      <div class="card"><div class="card-head"><span class="card-title">📅 Prochaines sessions</span><span class="card-link" onclick="goTo('sessions-upcoming')">Voir tout →</span></div><div id="dash-sessions"></div></div>
     </div>
   </div>
 
-  <!-- ══ MES MENTORS ══ -->
-  <div id="sec-mes-mentors" class="section">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
-      <div><div class="page-title">👥 Mes mentors</div><div class="page-sub">Tes mentors actifs</div></div>
-      <button class="btn-blue" onclick="goTo('explorer')">+ Trouver un mentor</button>
-    </div>
-    <div id="mes-mentors-list"></div>
+  <!-- DEMANDES NOUVELLES -->
+  <div id="sec-demandes-nouvelles" class="section">
+    <div class="page-title">📥 Demandes reçues</div>
+    <div class="page-sub">Les étudiants qui demandent ton aide</div>
+    <div id="demandes-nouvelles-list"></div>
   </div>
 
-  <!-- ══ EXPLORER ══ -->
-  <div id="sec-explorer" class="section">
-    <div class="page-title">🔍 Explorer les mentors</div>
-    <div class="page-sub">Trouve le mentor idéal selon ta filière et tes besoins</div>
-    <div class="explore-bar">
-      <div class="eb-input">
-        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="explore-search" placeholder="Matière, compétence..." oninput="renderExplore()">
-      </div>
-      <select class="eb-sel" id="explore-filiere" onchange="renderExplore()">
-        <option value="">Toutes les filières</option>
-        <option>IA</option><option>IM</option><option>GL</option><option>SE&IoT</option><option>SI</option>
-      </select>
-      <select class="eb-sel" id="explore-format" onchange="renderExplore()">
-        <option value="">Tout format</option>
-        <option>En ligne</option><option>Présentiel</option><option>Les deux</option>
-      </select>
-    </div>
-    <div class="filter-chips" id="filter-chips">
-      <span class="fchip active" onclick="filterByTag(this,'')">Tous</span>
-      <span class="fchip" onclick="filterByTag(this,'Python')">Python</span>
-      <span class="fchip" onclick="filterByTag(this,'Algorithmique')">Algorithmique</span>
-      <span class="fchip" onclick="filterByTag(this,'SQL')">SQL</span>
-      <span class="fchip" onclick="filterByTag(this,'Machine Learning')">Machine Learning</span>
-      <span class="fchip" onclick="filterByTag(this,'Dev web')">Dev web</span>
-      <span class="fchip" onclick="filterByTag(this,'Réseaux')">Réseaux</span>
-      <span class="fchip" onclick="filterByTag(this,'Maths')">Maths</span>
-    </div>
-    <div class="mentor-cards" id="explore-results"></div>
+  <!-- DEMANDES ACCEPTÉES -->
+  <div id="sec-demandes-acceptees" class="section">
+    <div class="page-title">✅ Demandes acceptées</div>
+    <div class="page-sub">Les étudiants que tu as accepté d'accompagner</div>
+    <div id="demandes-acceptees-list"></div>
   </div>
 
-  <!-- ══ MESSAGERIE ══ -->
+  <!-- MENTORÉS ACTIFS -->
+  <div id="sec-mentores-actifs" class="section">
+    <div class="page-title">👥 Mes mentorés actifs</div>
+    <div class="page-sub">Les étudiants que tu accompagnes actuellement</div>
+    <div id="mentores-actifs-grid"></div>
+  </div>
+
+  <!-- PROGRESSION -->
+  <div id="sec-progression-mentores" class="section">
+    <div class="page-title">📈 Progression de mes mentorés</div>
+    <div class="page-sub">Suivi des avancées de chaque mentoré</div>
+    <div id="progression-mentores-list"></div>
+  </div>
+
+  <!-- MESSAGERIE -->
   <div id="sec-messagerie" class="section">
     <div class="page-title">💬 Messagerie</div>
-    <div class="page-sub" style="margin-bottom:14px">Tes conversations avec tes mentors</div>
-    <div class="chat-layout" id="chat-layout">
-      <!-- liste conv -->
+    <div class="page-sub" style="margin-bottom:14px">Tes conversations avec tes mentorés</div>
+    <div class="chat-layout">
       <div class="conv-list">
-        <div class="conv-search-wrap">
-          <div class="conv-search">
-            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" placeholder="Rechercher..." oninput="filterConvs(this.value)">
-          </div>
-        </div>
+        <div class="conv-search-wrap"><div class="conv-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Rechercher..." oninput="filterConvs(this.value)"></div></div>
         <div class="conv-items" id="conv-items"></div>
       </div>
-      <!-- zone chat -->
-      <div class="chat-zone" id="chat-zone">
-        <div class="chat-no-select" id="chat-placeholder">
-          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <p style="font-size:14px">Sélectionne une conversation</p>
-        </div>
+      <div class="chat-zone">
+        <div class="chat-no-select" id="chat-placeholder"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><p style="font-size:14px">Sélectionne une conversation</p></div>
         <div id="chat-active" style="display:none;flex-direction:column;height:100%">
-          <div class="chat-header">
-            <div class="av" id="chat-av" style="width:38px;height:38px;border-radius:50%;font-size:12px"></div>
-            <div class="chat-header-info">
-              <div class="chat-header-name" id="chat-name"></div>
-              <div class="chat-header-status">● En ligne</div>
-            </div>
-          </div>
+          <div class="chat-header"><div class="av" id="chat-av" style="width:38px;height:38px;border-radius:50%;font-size:12px"></div><div><div class="chat-header-name" id="chat-name"></div><div class="chat-header-status">● En ligne</div></div></div>
           <div class="chat-messages" id="chat-messages"></div>
-          <div class="chat-input-area">
-            <input type="text" id="chat-input" placeholder="Écrire un message..." onkeydown="if(event.key==='Enter')sendMsg()">
-            <button class="send-btn" onclick="sendMsg()">
-              <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            </button>
-          </div>
+          <div class="chat-input-area"><input type="text" id="chat-input" placeholder="Écrire un message..." onkeydown="if(event.key==='Enter')sendMsg()"><button class="send-btn" onclick="sendMsg()"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ══ SESSIONS À VENIR ══ -->
+  <!-- SESSIONS À VENIR -->
   <div id="sec-sessions-upcoming" class="section">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
-      <div><div class="page-title">📅 Sessions à venir</div><div class="page-sub">Tes sessions confirmées et en attente</div></div>
-      <button class="btn-blue" onclick="openModal('modal-session')">+ Demander une session</button>
-    </div>
-    <div id="upcoming-sessions-list"></div>
+    <div class="page-title">📅 Sessions à venir</div>
+    <div class="page-sub">Tes sessions confirmées et en attente de validation</div>
+    <div id="upcoming-list"></div>
   </div>
 
-  <!-- ══ SESSIONS PASSÉES ══ -->
+  <!-- SESSIONS PASSÉES -->
   <div id="sec-sessions-done" class="section">
     <div class="page-title">✅ Sessions passées</div>
-    <div class="page-sub">Historique de tes sessions de mentorat</div>
-    <div id="done-sessions-list"></div>
+    <div class="page-sub">Historique de toutes tes sessions de mentorat</div>
+    <div id="done-list"></div>
   </div>
 
-  <!-- ══ PROGRESSION ══ -->
-  <div id="sec-progression" class="section">
-    <div class="page-title">📈 Ma progression</div>
-    <div class="page-sub">Suivi de tes avancées par matière</div>
-    <div class="prog-stats" id="prog-stats-row"></div>
-    <div class="prog-list" id="prog-list"></div>
-  </div>
-
-  <!-- ══ DEMANDES ══ -->
-  <div id="sec-demandes" class="section">
+  <!-- MES OFFRES -->
+  <div id="sec-offres" class="section">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
-      <div><div class="page-title">📝 Mes demandes</div><div class="page-sub">Tes demandes de mentorat publiées</div></div>
-      <button class="btn-blue" onclick="openModal('modal-demande')">+ Nouvelle demande</button>
+      <div><div class="page-title">📋 Mes offres de mentorat</div><div class="page-sub">Tes offres publiées visibles par les étudiants</div></div>
+      <button class="btn-gold" onclick="openModal('modal-offre')">+ Publier une offre</button>
     </div>
-    <div id="demandes-list"></div>
+    <div id="offres-list"></div>
   </div>
 
-  <!-- ══ PROFIL ══ -->
+  <!-- MON PROFIL -->
   <div id="sec-profil" class="section">
-    <div class="page-title">👤 Mon profil</div>
-    <div class="page-sub">Tes informations visibles par les mentors</div>
+    <div class="page-title">👤 Mon profil Mentor</div>
+    <div class="page-sub">Tes informations visibles par les étudiants</div>
     <div class="profil-grid">
       <div>
         <div class="profil-card">
-          <div class="pav" id="profil-av"></div>
-          <button class="btn-upload">📷 Changer la photo</button>
-          <div class="pname" id="profil-name" style="margin-top:12px"></div>
-          <div class="psub" id="profil-sub"></div>
-          <div style="margin-top:12px">
-            <div class="pbar2-label" id="profil-pct-label">Profil complété à 72%</div>
-            <div class="pbar2" style="margin-top:5px"><div class="pfill2" id="profil-pct-fill" style="width:72%"></div></div>
+          <!-- Photo de profil avec upload -->
+          <div class="pav-wrap" onclick="document.getElementById('photoInput').click()" title="Changer la photo">
+            <div class="pav" id="profil-av">KA</div>
+            <div class="pav-overlay"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+          </div>
+          <input type="file" id="photoInput" accept="image/*" onchange="handlePhotoUpload(this)">
+          <p style="font-size:11px;color:var(--muted);margin:4px 0 12px">Clique sur la photo pour changer</p>
+          <div class="pname" id="profil-name"></div>
+          <div class="psub" id="profil-sub">Filière GL · Licence 3</div>
+          <div class="mentor-badge-card">
+            <div class="mbc-label">⭐ Badge Mentor IFRI 2025-2026</div>
+            <div class="mbc-val" id="badge-status">Débloqué après 3 sessions ✓</div>
+          </div>
+          <div style="margin-top:8px">
+            <div class="pbar2-label" id="profil-pct-label">Profil complété à 85%</div>
+            <div class="pbar2" style="margin-top:5px"><div class="pfill2" id="profil-pct-fill" style="width:85%"></div></div>
           </div>
           <div class="pstats">
             <div class="pst"><span class="pst-n" id="p-stat-sess">0</span><span class="pst-l">Sessions</span></div>
-            <div class="pst"><span class="pst-n" id="p-stat-ment">0</span><span class="pst-l">Mentors</span></div>
-            <div class="pst"><span class="pst-n" id="p-stat-prog">0%</span><span class="pst-l">Progression</span></div>
+            <div class="pst"><span class="pst-n" id="p-stat-ment">0</span><span class="pst-l">Mentorés</span></div>
+            <div class="pst"><span class="pst-n" id="p-stat-note">⭐ —</span><span class="pst-l">Note</span></div>
           </div>
         </div>
       </div>
@@ -660,77 +583,69 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
             <div class="fgroup"><label>PRÉNOM</label><input type="text" id="p-prenom" value="" disabled></div>
             <div class="fgroup"><label>EMAIL</label><input type="email" id="p-email" value="" disabled></div>
             <div class="fgroup"><label>TÉLÉPHONE</label><input type="tel" id="p-tel" value="" disabled></div>
-            <div class="fgroup"><label>FILIÈRE</label>
-              <select id="p-filiere" disabled>
-                <option value="">—</option>
-                <option value="Génie Logiciel">Génie Logiciel</option>
-                <option value="Intelligence Artificielle">Intelligence Artificielle</option>
-                <option value="Internet et multimédia">Internet et multimédia</option>
-                <option value="Systèmes Embarqués & IoT">Systèmes Embarqués & IoT</option>
-                <option value="Sécurité Informatique">Sécurité Informatique</option>
-              </select>
-            </div>
-            <div class="fgroup"><label>NIVEAU</label>
-              <select id="p-niveau" disabled>
-                <option value="">—</option>
-                <option value="Licence 1">Licence 1</option>
-                <option value="Licence 2">Licence 2</option>
-                <option value="Licence 3">Licence 3</option>
-                <option value="Master 1">Master 1</option>
-                <option value="Master 2">Master 2</option>
-                <option value="Master 3">Master 3</option>
-              </select>
-            </div>
+            <div class="fgroup"><label>FILIÈRE</label><select id="p-filiere" disabled><option>GL</option><option>IA</option><option>IM</option><option>SE&IoT</option><option>SI</option></select></div>
+            <div class="fgroup"><label>NIVEAU</label><select id="p-niveau" disabled><option>L1</option><option>L2</option><option>L3</option><option>M1</option><option>M2</option></select></div>
           </div>
           <div class="fgroup" style="margin-top:12px"><label>BIO</label><textarea id="p-bio" disabled></textarea></div>
-          <button class="btn-blue" id="save-profil-btn" style="display:none;margin-top:14px;width:100%" onclick="saveProfil()">Enregistrer</button>
+          <button class="btn-gold" id="save-profil-btn" style="display:none;margin-top:14px;width:100%" onclick="saveProfil()">Enregistrer</button>
         </div>
         <div class="pform-card">
-          <div class="pform-head"><span class="pform-title">Compétences & Besoins</span></div>
-          <div style="font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Points forts</div>
-          <div class="chips-row" id="chips-forts"></div>
-          <div style="font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--muted);text-transform:uppercase;margin:14px 0 8px">Besoins d'aide</div>
-          <div class="chips-row" id="chips-faibles"></div>
+          <div class="pform-head"><span class="pform-title">Matières enseignées</span></div>
+          <div class="chips-row" id="chips-matieres"></div>
         </div>
         <div class="pform-card">
-          <div class="pform-head"><span class="pform-title">Disponibilités</span></div>
+          <div class="pform-head"><span class="pform-title">Disponibilités & Format</span></div>
           <div class="dispo-days" id="dispo-days"></div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
             <div class="fgroup"><label>HEURE DÉBUT</label><input type="time" id="p-hdebut" value="14:00"></div>
-            <div class="fgroup"><label>HEURE FIN</label><input type="time" id="p-hfin" value="18:00"></div>
+            <div class="fgroup"><label>HEURE FIN</label><input type="time" id="p-hfin" value="17:00"></div>
           </div>
-          <button class="btn-blue" style="margin-top:14px;width:100%" onclick="saveDispo()">Enregistrer les disponibilités</button>
+          <div style="margin-top:12px;margin-bottom:6px;font-size:11px;font-weight:700;letter-spacing:.4px;color:var(--text)">FORMAT</div>
+          <div class="format-grid" id="format-grid"></div>
+          <button class="btn-gold" style="margin-top:14px;width:100%" onclick="saveDispo()">Enregistrer les disponibilités</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ══ PARAMÈTRES ══ -->
+  <!-- STATISTIQUES -->
+  <div id="sec-statistiques" class="section">
+    <div class="page-title">📊 Mes statistiques</div>
+    <div class="page-sub">Vue d'ensemble de ton activité de mentor</div>
+    <div class="stats-row" style="margin-bottom:20px">
+      <div class="sc go"><div class="sc-l">Sessions totales</div><div class="sc-v" id="s-total">0</div><div class="sc-h">depuis le début</div></div>
+      <div class="sc gr"><div class="sc-l">Mentorés accompagnés</div><div class="sc-v" id="s-mentores">0</div><div class="sc-h">au total</div></div>
+      <div class="sc bl"><div class="sc-l">Heures de mentorat</div><div class="sc-v" id="s-heures">0h</div><div class="sc-h">total</div></div>
+      <div class="sc pu"><div class="sc-l">Note moyenne</div><div class="sc-v" id="s-note">—</div><div class="sc-h">sur 5 ⭐</div></div>
+    </div>
+    <div class="stats-detail-grid">
+      <div class="stat-detail-card"><div class="card-head"><span class="card-title">📚 Matières les plus demandées</span></div><div id="stats-matieres"></div></div>
+      <div class="stat-detail-card"><div class="card-head"><span class="card-title">📅 Sessions par mois</span></div><div id="stats-sessions-mois"></div></div>
+    </div>
+  </div>
+
+  <!-- PARAMÈTRES -->
   <div id="sec-parametres" class="section">
     <div class="page-title">⚙️ Paramètres</div>
     <div class="page-sub">Gère tes préférences et ta sécurité</div>
     <div class="params-grid">
-      <div class="card">
-        <div class="card-head"><span class="card-title">🔔 Notifications</span></div>
+      <div class="card"><div class="card-head"><span class="card-title">🔔 Notifications</span></div>
+        <div class="param-row"><div><div class="pr-l">Nouvelles demandes</div><div class="pr-s">Notif. quand un étudiant te contacte</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
         <div class="param-row"><div><div class="pr-l">Nouveaux messages</div><div class="pr-s">Notif. à chaque message reçu</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-        <div class="param-row"><div><div class="pr-l">Nouvelles correspondances</div><div class="pr-s">Quand un mentor te correspond</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-        <div class="param-row"><div><div class="pr-l">Rappels de sessions</div><div class="pr-s">30 min avant chaque session</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
-        <div class="param-row"><div><div class="pr-l">Emails hebdomadaires</div><div class="pr-s">Résumé de ton activité</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+        <div class="param-row"><div><div class="pr-l">Rappels de sessions</div><div class="pr-s">30 min avant chaque session</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="param-row"><div><div class="pr-l">Résumé hebdomadaire</div><div class="pr-s">Récap de ton activité</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
       </div>
-      <div class="card">
-        <div class="card-head"><span class="card-title">🔒 Sécurité</span></div>
+      <div class="card"><div class="card-head"><span class="card-title">🔒 Sécurité</span></div>
         <div class="fgroup-full"><label>MOT DE PASSE ACTUEL</label><input type="password" placeholder="••••••••"></div>
         <div class="fgroup-full"><label>NOUVEAU MOT DE PASSE</label><input type="password" placeholder="••••••••"></div>
         <div class="fgroup-full"><label>CONFIRMER</label><input type="password" placeholder="••••••••"></div>
-        <button class="btn-blue" style="margin-top:10px;width:100%">Changer le mot de passe</button>
+        <button class="btn-gold" style="margin-top:10px;width:100%">Changer le mot de passe</button>
       </div>
-      <div class="card">
-        <div class="card-head"><span class="card-title">🌐 Confidentialité</span></div>
-        <div class="param-row"><div><div class="pr-l">Profil visible par tous</div><div class="pr-s">Les mentors peuvent te trouver</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
-        <div class="param-row"><div><div class="pr-l">Afficher mes stats</div><div class="pr-s">Sessions et progression visibles</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+      <div class="card"><div class="card-head"><span class="card-title">👁 Visibilité</span></div>
+        <div class="param-row"><div><div class="pr-l">Profil visible</div><div class="pr-s">Apparaître dans les résultats</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="param-row"><div><div class="pr-l">Accepter de nouvelles demandes</div><div class="pr-s">Désactiver pour ne plus recevoir</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
       </div>
-      <div class="card" style="border-color:var(--red-light)">
-        <div class="card-head"><span class="card-title" style="color:var(--red)">⚠️ Zone dangereuse</span></div>
+      <div class="card" style="border-color:var(--red-light)"><div class="card-head"><span class="card-title" style="color:var(--red)">⚠️ Zone dangereuse</span></div>
         <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Ces actions sont irréversibles.</p>
         <button class="btn-danger" style="width:100%;margin-bottom:8px">Désactiver mon compte</button>
         <button class="btn-danger" style="width:100%">Supprimer définitivement</button>
@@ -741,923 +656,742 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 </main>
 </div>
 
-<!-- ══ MODAL : NOUVELLE DEMANDE ══ -->
-<div class="overlay" id="modal-demande" onclick="closeOverlay(event,'modal-demande')">
+<!-- MODAL ACCEPTER DEMANDE -->
+<div class="overlay" id="modal-accept" onclick="closeOverlay(event,'modal-accept')">
   <div class="modal">
-    <div class="modal-head"><h3>📝 Nouvelle demande</h3><button class="modal-close" onclick="closeModal('modal-demande')">✕</button></div>
-    <div class="fgroup-full"><label>MATIÈRE</label>
-      <select id="dem-matiere">
-        <option value="">Choisir une matière...</option>
-        <option>Algorithmique</option><option>Python</option><option>SQL / BDD</option>
-        <option>Machine Learning</option><option>Développement web</option><option>Mathématiques</option><option>Réseaux</option>
-      </select>
-    </div>
-    <div class="fgroup-full"><label>DESCRIPTION</label>
-      <textarea id="dem-desc" placeholder="Décris ton besoin précisément..."></textarea>
-    </div>
+    <div class="modal-head"><h3>✅ Accepter la demande</h3><button class="modal-close" onclick="closeModal('modal-accept')">✕</button></div>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:18px" id="accept-sub"></p>
+    <div class="fgroup-full"><label>MESSAGE DE BIENVENUE</label><textarea id="accept-msg" placeholder="Bonjour ! Je serais ravi de t'accompagner..."></textarea></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="fgroup-full"><label>FORMAT</label>
-        <select id="dem-format"><option>En ligne</option><option>Présentiel</option><option>Les deux</option></select>
-      </div>
-      <div class="fgroup-full"><label>DISPONIBILITÉ</label>
-        <input type="text" id="dem-dispo" placeholder="Ex: Lun/Mer 14h-17h">
-      </div>
+      <div class="fgroup-full"><label>DATE PREMIÈRE SESSION</label><input type="date" id="accept-date"></div>
+      <div class="fgroup-full"><label>HEURE</label><input type="time" id="accept-heure" value="14:00"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn-outline2" onclick="closeModal('modal-demande')">Annuler</button>
-      <button class="btn-blue" onclick="submitDemande()">Publier la demande</button>
+      <button class="btn-outline2" onclick="closeModal('modal-accept')">Annuler</button>
+      <button class="btn-gold" onclick="confirmAccept()">Accepter et envoyer</button>
     </div>
   </div>
 </div>
 
-<!-- ══ MODAL : DEMANDER SESSION ══ -->
-<div class="overlay" id="modal-session" onclick="closeOverlay(event,'modal-session')">
+<!-- MODAL PUBLIER OFFRE -->
+<div class="overlay" id="modal-offre" onclick="closeOverlay(event,'modal-offre')">
   <div class="modal">
-    <div class="modal-head"><h3>📅 Demander une session</h3><button class="modal-close" onclick="closeModal('modal-session')">✕</button></div>
-    <div class="fgroup-full"><label>MENTOR</label>
-      <select id="sess-mentor-sel"></select>
-    </div>
+    <div class="modal-head"><h3>📋 Publier une offre</h3><button class="modal-close" onclick="closeModal('modal-offre')">✕</button></div>
     <div class="fgroup-full"><label>MATIÈRE</label>
-      <select id="sess-matiere">
-        <option>Algorithmique</option><option>Python</option><option>SQL / BDD</option><option>Machine Learning</option>
-      </select>
+      <select id="offre-matiere"><option value="">Choisir...</option><option>Algorithmique</option><option>Python</option><option>SQL / BDD</option><option>Machine Learning</option><option>Développement web</option><option>Mathématiques</option><option>Réseaux</option><option>C / C++</option></select>
     </div>
+    <div class="fgroup-full"><label>DESCRIPTION</label><textarea id="offre-desc" placeholder="Décris ce que tu peux apporter..."></textarea></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="fgroup-full"><label>DATE</label><input type="date" id="sess-date"></div>
-      <div class="fgroup-full"><label>HEURE</label><input type="time" id="sess-heure" value="14:00"></div>
+      <div class="fgroup-full"><label>NIVEAUX CIBLÉS</label><select id="offre-niveau"><option>L1 - L2</option><option>L3 - M1</option><option>Tous niveaux</option></select></div>
+      <div class="fgroup-full"><label>FORMAT</label><select id="offre-format"><option>En ligne</option><option>Présentiel</option><option>Les deux</option></select></div>
     </div>
-    <div class="fgroup-full"><label>FORMAT</label>
-      <select id="sess-format"><option>En ligne</option><option>Présentiel</option></select>
-    </div>
+    <div class="fgroup-full"><label>DISPONIBILITÉ</label><input type="text" id="offre-dispo" placeholder="Ex: Lun/Mer 14h-17h"></div>
     <div class="modal-footer">
-      <button class="btn-outline2" onclick="closeModal('modal-session')">Annuler</button>
-      <button class="btn-blue" onclick="submitSession()">Envoyer la demande</button>
+      <button class="btn-outline2" onclick="closeModal('modal-offre')">Annuler</button>
+      <button class="btn-gold" onclick="submitOffre()">Publier l'offre</button>
     </div>
   </div>
 </div>
 
-<!-- ══ MODAL : CONTACTER MENTOR ══ -->
-<div class="overlay" id="modal-contact" onclick="closeOverlay(event,'modal-contact')">
-  <div class="modal">
-    <div class="modal-head"><h3 id="contact-title">Contacter</h3><button class="modal-close" onclick="closeModal('modal-contact')">✕</button></div>
-    <p style="font-size:14px;color:var(--muted);margin-bottom:18px" id="contact-sub"></p>
-    <div class="fgroup-full"><label>MESSAGE</label>
-      <textarea id="contact-msg" placeholder="Bonjour, je souhaite bénéficier de ton aide pour..."></textarea>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-outline2" onclick="closeModal('modal-contact')">Annuler</button>
-      <button class="btn-blue" onclick="submitContact()">Envoyer le message</button>
-    </div>
-  </div>
-</div>
-
-<!-- LOADER -->
-<div id="app-loader" style="display:none;position:fixed;inset:0;background:rgba(247,249,255,.85);z-index:400;align-items:center;justify-content:center;flex-direction:column;gap:14px">
-  <div style="width:40px;height:40px;border:3px solid var(--blue-light);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite"></div>
-  <span style="font-size:13px;font-weight:600;color:var(--muted)">Chargement…</span>
-</div>
-<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
-
-<!-- TOAST -->
-<div id="toast" style="position:fixed;bottom:24px;right:24px;background:var(--navy);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;transform:translateY(80px);opacity:0;transition:.3s;z-index:300;pointer-events:none"></div>
+<div id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════════════════════
-//  CONFIG API
-// ══════════════════════════════════════════════════════════
-const BASE_URL = 'http://localhost:8000';
-const COLORS   = ['av-b', 'av-g', 'av-p', 'av-o'];
-
-// ── Tokens JWT ────────────────────────────────────────────
-function getAccessToken()  { return localStorage.getItem('access_token');  }
-function getRefreshToken() { return localStorage.getItem('refresh_token'); }
-function saveTokens(a, r)  { localStorage.setItem('access_token', a); localStorage.setItem('refresh_token', r); }
-function clearTokens()     { localStorage.removeItem('access_token'); localStorage.removeItem('refresh_token'); }
-
-async function refreshAccessToken() {
-  const refresh = getRefreshToken();
-  if (!refresh) return false;
-  try {
-    const res = await fetch(`${BASE_URL}/api/token/refresh/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh })
-    });
-    if (!res.ok) return false;
-    const data = await res.json();
-    localStorage.setItem('access_token', data.access);
-    return true;
-  } catch { return false; }
-}
-
-async function apiFetch(endpoint, options = {}) {
-  const makeReq = (token) => fetch(BASE_URL + endpoint, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options.headers || {})
-    }
-  });
-
-  let res = await makeReq(getAccessToken());
-
-  if (res.status === 401) {
-    const ok = await refreshAccessToken();
-    if (ok) { res = await makeReq(getAccessToken()); }
-    else { clearTokens(); window.location.href = 'connexion_etudiant.html'; return null; }
-  }
-  if (!res.ok) { console.error(`[API] ${res.status} ${endpoint}`); return null; }
-  if (res.status === 204) return true;
-  return res.json();
-}
-
-// ── Formateurs ────────────────────────────────────────────
-function formaterMentor(raw, idx = 0) {
-  const mentor = raw.mentor || raw;
-  const offre  = raw.offre  || {};
-  const prenom = mentor.prenom || '';
-  const nom    = mentor.nom    || '';
-  return {
-    id       : mentor.id,
-    initiales: `${prenom[0]||''}${nom[0]||''}`.toUpperCase(),
-    color    : COLORS[idx % COLORS.length],
-    nom      : `${prenom} ${nom}`.trim(),
-    filiere  : mentor.filiere       || '',
-    niveau   : mentor.niveau_etudes || '',
-    chips    : offre.matiere ? [offre.matiere.nom] : (mentor.competences || []),
-    score    : raw.score            || 0,
-    dispo    : (raw.horaires_communs || []).join(', ') || 'À définir',
-    format   : offre.format         || 'En ligne',
-  };
-}
-
-function formaterSession(raw) {
-  const d    = new Date(raw.date);
-  const mois = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'][d.getMonth()];
-  return {
-    id        : raw.id,
-    matiere   : raw.matiere?.nom || raw.matiere || '',
-    mentor    : raw.mentor_nom   || '',
-    date      : `${d.getDate()} ${mois}`,
-    dateShort : String(d.getDate()),
-    mois,
-    heure     : raw.heure  || '',
-    format    : raw.format || '',
-    status    : raw.statut || 'En attente',
-  };
-}
-
-function formaterDemande(raw) {
-  const d = new Date(raw.date_creation);
-  return {
-    id      : raw.id,
-    matiere : raw.matiere?.nom || raw.matiere || '',
-    desc    : raw.description  || '',
-    format  : raw.format       || '',
-    dispo   : raw.disponibilite || 'Non précisé',
-    date    : `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`,
-    status  : raw.statut === 'active' ? 'Active' : raw.statut === 'cloturee' ? 'Clôturée' : 'En attente',
-    reponses: raw.nb_reponses  || 0,
-  };
-}
-
-// ══════════════════════════════════════════════════════════
-//  ÉTAT DE L'APPLICATION  (alimenté par le backend)
-// ══════════════════════════════════════════════════════════
-const state = {
-  user        : { nom:'', prenom:'', email:'', tel:'', filiere:'', niveau:'', bio:'' },
-  forts       : [],
-  faibles     : [],
-  dispo       : { jours:[], debut:'', fin:'' },
-  mentors     : [],       // mentors actifs de l'étudiant
-  allMentors  : [],       // toutes les recommandations
-  conversations: {},      // id_mentor → [ {from, text, time, read} ]
-  sessions    : { upcoming: [], done: [] },
-  demandes    : [],
-  progression : [],
-  activeConv  : null,
-  filterTag   : '',
+// ════════════════════════════════════════════════
+//  CONFIGURATION API DJANGO
+//  Remplace ces URLs par tes vraies URLs Django
+// ════════════════════════════════════════════════
+const API = {
+  // Pour utiliser en production Django, décommente ces lignes :
+  // demandes:   '/api/mentor/demandes/',
+  // acceptees:  '/api/mentor/demandes/acceptees/',
+  // mentores:   '/api/mentor/mentores/',
+  // sessions:   '/api/mentor/sessions/',
+  // offres:     '/api/mentor/offres/',
+  // messages:   (id) => `/api/conversations/${id}/messages/`,
+  // profil:     '/api/mentor/profil/',
+  // photo:      '/api/mentor/profil/photo/',
+  USE_MOCK: true,  // passer à false quand Django est prêt
 };
 
-// ══════════════════════════════════════════════════════════
-//  INITIALISATION — charge toutes les données au démarrage
-// ══════════════════════════════════════════════════════════
-async function initApp() {
-  const token = getAccessToken();
-  if (!token) {
+// ════════════════════════════════════════════════
+//  CHARGEMENT DES DONNÉES UTILISATEUR
+//  Lit le bloc #user-data (injecté par Django ou localStorage)
+// ════════════════════════════════════════════════
+function loadUserData() {
+  // ── Étape 1 : lire currentUser depuis localStorage ──
+  // C'est l'utilisateur qui vient de se connecter via connexion.html
+  const stored = JSON.parse(localStorage.getItem('currentUser') || 'null');
+
+  // ── Protection : si pas connecté ou mauvais rôle → redirection ──
+  if (!stored) {
     window.location.href = 'connexion.html';
-    return;
+    return {};
+  }
+  if (stored.role !== 'mentore') {
+    // C'est un mentor, on le redirige vers son dashboard
+    window.location.href = 'dashboard-mentor.html';
+    return {};
   }
 
-  showLoader(true);
-  try {
-    // 1. Profil utilisateur
-    const profil = await apiFetch('/api/users/me/');
-    if (profil) {
-      state.user   = {
-        nom    : profil.nom          || '',
-        prenom : profil.prenom       || '',
-        email  : profil.email        || '',
-        tel    : profil.telephone    || '',
-        filiere: profil.filiere      || '',
-        niveau : profil.niveau_etudes|| '',
-        bio    : profil.bio          || '',
-      };
-      state.forts  = profil.points_forts  || [];
-      state.faibles= profil.lacunes_noms  || [];
-      state.dispo  = {
-        jours: profil.jours_dispo  || [],
-        debut: profil.heure_debut  || '',
-        fin  : profil.heure_fin    || '',
-      };
+  // ── Étape 2 : construire le profil depuis les données stockées ──
+  return {
+    nom:      stored.nom        || '',
+    prenom:   stored.prenom     || '',
+    email:    stored.email      || '',
+    tel:      stored.telephone  || '',
+    filiere:  stored.filiere    || '',
+    niveau:   stored.niveau     || '',
+    bio:      stored.bio        || '',
+    photo:    stored.photo      || '',
+    // Besoins = matières difficiles pour un mentoré
+    matieres: stored.pointsFaibles || [],
+    niveaux:  ['L1','L2','L3'],
+    formats:  ['En ligne'],
+    dispo: {
+      jours: ['Lundi','Mercredi'],
+      debut: '14:00',
+      fin:   '17:00',
     }
+  };
 
-    // 2. Recommandations de mentors (matching)
-    const matching = await apiFetch('/api/matching/');
-    if (matching?.recommendations) {
-      state.allMentors = matching.recommendations.map(formaterMentor);
-    }
+  // ── EN DJANGO : ignore tout ce qui précède et utilise directement ──
+  // les data-attributes du bloc #user-data injectés par le contexte de la vue.
+  // Le code Django serait simplement :
+  // return { nom: el.dataset.nom, prenom: el.dataset.prenom, ... }
+}
 
-    // 3. Mes mentors actifs
-    const mesMentors = await apiFetch('/api/matching/mes-mentors/');
-    if (mesMentors?.mentors) {
-      state.mentors = mesMentors.mentors.map(formaterMentor);
-    }
+// ════════════════════════════════════════════════
+//  ÉTAT GLOBAL
+// ════════════════════════════════════════════════
+const userData = loadUserData();
+const state = {
+  mentor:        userData,
+  matieres:      userData.matieres,
+  formats:       userData.formats,
+  dispo:         userData.dispo,
+  demandes:      [],
+  acceptees:     [],
+  mentores:      [],
+  conversations: {},
+  sessions:      { upcoming:[], done:[] },
+  offres:        [],
+  activeConv:    null,
+  pendingAccept: null,
+};
 
-    // 4. Conversations / messages
-    const convs = await apiFetch('/api/messaging/conversations/');
-    if (convs) {
-      convs.forEach(conv => {
-        state.conversations[conv.mentor_id] = (conv.messages || []).map(m => ({
-          from : m.auteur_id === profil?.id ? 'moi' : 'autre',
-          text : m.contenu,
-          time : new Date(m.date_envoi).toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }),
-          read : m.lu,
-        }));
-      });
-    }
+const AVATARS  = ['av-b','av-g','av-p','av-o'];
+const AVA_NOMS = [['JD','Jean Dupont','GL','L2',['Algorithmique','ML']],['FA','Fatou Ahouandjinou','IM','L3',['Maths','SQL']],['RS','Roland Sossou','IA','L1',['Python','Stats']],['AC','Abigail Cossou','SI','L2',['Réseaux','Linux']]];
 
-    // 5. Sessions à venir
-    const sessUp = await apiFetch('/api/matching/sessions/?statut=upcoming');
-    if (sessUp?.sessions) {
-      state.sessions.upcoming = sessUp.sessions.map(formaterSession);
-    }
+// ════════════════════════════════════════════════
+//  FETCH (simulation / à remplacer par vrais appels API)
+// ════════════════════════════════════════════════
+async function fetchDemandes() {
+  if (!API.USE_MOCK) {
+    const res = await fetch(API.demandes, { headers:{ 'X-CSRFToken': getCookie('csrftoken') } });
+    const data = await res.json();
+    state.demandes  = data.filter(d => d.status === 'Nouvelle');
+    state.acceptees = data.filter(d => d.status === 'Acceptée');
+  }
+  // mock : utilise state.demandes déjà rempli par simulerDemande()
+}
 
-    // 6. Sessions passées
-    const sessDone = await apiFetch('/api/matching/sessions/?statut=done');
-    if (sessDone?.sessions) {
-      state.sessions.done = sessDone.sessions.map(formaterSession);
-    }
-
-    // 7. Demandes de mentorat
-    const dem = await apiFetch('/api/matching/demandes/');
-    if (dem?.demandes) {
-      state.demandes = dem.demandes.map(formaterDemande);
-    }
-
-  } catch (err) {
-    console.error('[initApp]', err);
-    toast('Erreur de chargement des données');
-  } finally {
-    showLoader(false);
-    renderAccueil();
-    renderExplore();
+async function fetchMentores() {
+  if (!API.USE_MOCK) {
+    const res = await fetch(API.mentores);
+    state.mentores = await res.json();
   }
 }
 
-function showLoader(visible) {
-  let el = document.getElementById('app-loader');
-  if (!el) return;
-  el.style.display = visible ? 'flex' : 'none';
+async function fetchSessions() {
+  if (!API.USE_MOCK) {
+    const res = await fetch(API.sessions);
+    const data = await res.json();
+    state.sessions.upcoming = data.filter(s => s.type === 'upcoming');
+    state.sessions.done     = data.filter(s => s.type === 'done');
+  }
 }
 
-// ══════════════════════════════════
+async function uploadPhoto(file) {
+  if (!API.USE_MOCK) {
+    const form = new FormData();
+    form.append('photo', file);
+    const res = await fetch(API.photo, { method:'POST', body:form, headers:{ 'X-CSRFToken': getCookie('csrftoken') } });
+    const data = await res.json();
+    return data.url;
+  }
+  // mock : retourne un ObjectURL local
+  return URL.createObjectURL(file);
+}
+
+function getCookie(name) {
+  const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+  return v ? v[2] : null;
+}
+
+// ════════════════════════════════════════════════
 //  NAVIGATION
-// ══════════════════════════════════
-const sections = ['accueil','mes-mentors','explorer','messagerie','sessions-upcoming','sessions-done','progression','demandes','profil','parametres'];
+// ════════════════════════════════════════════════
+const SECTIONS = ['accueil','demandes-nouvelles','demandes-acceptees','mentores-actifs','progression-mentores','messagerie','sessions-upcoming','sessions-done','offres','profil','statistiques','parametres'];
 
 function goTo(id) {
-  sections.forEach(s => {
-    const el = document.getElementById('sec-' + s);
-    if(el) el.classList.remove('active');
-  });
-  const target = document.getElementById('sec-' + id);
-  if(target) target.classList.add('active');
-
-  // sidebar actives
-  document.querySelectorAll('.nav-direct,.nav-child,.nav-group-trigger').forEach(el => el.classList.remove('active'));
-  const map = {
-    'accueil':'nav-accueil','profil':'nav-profil','parametres':'nav-parametres',
-  };
-  if(map[id]) document.getElementById(map[id])?.classList.add('active');
-
-  // render dynamique
+  SECTIONS.forEach(s => { const el=document.getElementById('sec-'+s); if(el) el.classList.remove('active'); });
+  const t = document.getElementById('sec-'+id);
+  if (t) t.classList.add('active');
+  document.querySelectorAll('.nav-direct,.nav-child,.nav-group-trigger').forEach(e=>e.classList.remove('active'));
+  const m = { 'accueil':'nav-accueil','profil':'nav-profil','statistiques':'nav-statistiques','parametres':'nav-parametres' };
+  if (m[id]) document.getElementById(m[id])?.classList.add('active');
   const renders = {
-    'accueil': renderAccueil,
-    'mes-mentors': renderMesMentors,
-    'explorer': renderExplore,
-    'messagerie': renderMessagerie,
-    'sessions-upcoming': () => renderSessions('upcoming'),
-    'sessions-done': () => renderSessions('done'),
-    'progression': renderProgression,
-    'demandes': renderDemandes,
-    'profil': renderProfil,
+    accueil: renderAccueil,
+    'demandes-nouvelles':  ()=>renderDemandes('nouvelles'),
+    'demandes-acceptees':  ()=>renderDemandes('acceptees'),
+    'mentores-actifs':     renderMentores,
+    'progression-mentores':renderProgression,
+    messagerie:            renderMessagerie,
+    'sessions-upcoming':   ()=>renderSessions('upcoming'),
+    'sessions-done':       ()=>renderSessions('done'),
+    offres:                renderOffres,
+    profil:                renderProfil,
+    statistiques:          renderStats,
   };
-  if(renders[id]) renders[id]();
+  if (renders[id]) renders[id]();
   document.getElementById('main-content').scrollTop = 0;
 }
 
-// ══════════════════════════════════
-//  ACCORDION SIDEBAR
-// ══════════════════════════════════
 function toggleGroup(name) {
-  const trig = document.getElementById('trig-' + name);
-  const children = document.getElementById('children-' + name);
-  if(!trig || !children) return;
-  const isOpen = children.classList.contains('open');
-  // fermer tous
-  document.querySelectorAll('.nav-children').forEach(c => c.classList.remove('open'));
-  document.querySelectorAll('.nav-group-trigger').forEach(t => t.classList.remove('open'));
-  if(!isOpen) {
-    children.classList.add('open');
-    trig.classList.add('open');
+  const trig = document.getElementById('trig-'+name);
+  const ch   = document.getElementById('children-'+name);
+  if (!trig||!ch) return;
+  const open = ch.classList.contains('open');
+  document.querySelectorAll('.nav-children').forEach(c=>c.classList.remove('open'));
+  document.querySelectorAll('.nav-group-trigger').forEach(t=>t.classList.remove('open'));
+  if (!open) { ch.classList.add('open'); trig.classList.add('open'); }
+}
+
+// ════════════════════════════════════════════════
+//  PHOTO DE PROFIL
+// ════════════════════════════════════════════════
+async function handlePhotoUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  // Validation taille (max 5 MB)
+  if (file.size > 5 * 1024 * 1024) { toast('Image trop lourde (max 5 Mo)'); return; }
+  // Validation type
+  if (!file.type.startsWith('image/')) { toast('Fichier non supporté'); return; }
+
+  toast('Envoi de la photo…');
+  const url = await uploadPhoto(file);
+
+  // Mise à jour locale
+  state.mentor.photo = url;
+
+  // Mise à jour avatar profil
+  const pav = document.getElementById('profil-av');
+  pav.innerHTML = `<img src="${url}" alt="Photo profil">`;
+
+  // Mise à jour avatar topbar
+  const tav = document.getElementById('topbar-av');
+  tav.innerHTML = `<img src="${url}" alt="Photo profil">`;
+
+  // Persistance localStorage (front-end uniquement)
+  const stored = JSON.parse(localStorage.getItem('currentUser') || 'null');
+  if (stored) { stored.photo = url; localStorage.setItem('currentUser', JSON.stringify(stored)); }
+
+  toast('Photo mise à jour ✓');
+}
+
+function renderAvatar(el, nom, prenom, photo, avClass='') {
+  if (photo) {
+    el.innerHTML = `<img src="${photo}" alt="${prenom}">`;
+  } else {
+    el.textContent = (prenom?.[0]||'') + (nom?.[0]||'');
+    if (avClass) el.className = `av ${avClass}`;
   }
 }
 
-// ══════════════════════════════════
+// ════════════════════════════════════════════════
 //  RENDER ACCUEIL
-// ══════════════════════════════════
+// ════════════════════════════════════════════════
 function renderAccueil() {
-  const u = state.user;
-  document.getElementById('welcome-title').textContent = `👋 Bonjour ${u.prenom} !`;
-  const msgs = Object.values(state.conversations).flat().filter(m => m.from !== 'moi' && !m.read);
-  document.getElementById('stat-mentors').textContent = state.mentors.length;
-  document.getElementById('stat-sessions').textContent = state.sessions.done.length;
-  document.getElementById('stat-messages').textContent = msgs.length;
-  document.getElementById('stat-msg-hint').textContent = msgs.length > 0 ? `→ ${msgs.length} non lu(s)` : 'Aucun message en attente';
-  document.getElementById('notif-dot').className = 'notif-dot' + (msgs.length > 0 ? ' show' : '');
+  const u = state.mentor;
+  document.getElementById('welcome-title').textContent = `👋 Bonjour ${u.prenom || 'Mentor'} !`;
+  const nb = state.demandes.filter(d=>d.status==='Nouvelle').length;
+  document.getElementById('stat-demandes').textContent = nb;
+  document.getElementById('stat-mentores').textContent = state.mentores.length;
+  document.getElementById('stat-sessions').textContent = state.sessions.upcoming.length;
+  document.getElementById('stat-done').textContent     = state.sessions.done.length;
+  const bd = document.getElementById('badge-dem');
+  bd.textContent = nb; bd.style.display = nb>0 ? '' : 'none';
+  document.getElementById('badge-mentores').textContent = state.mentores.length;
+  updateBadges();
 
-  // badge msg sidebar
-  const bm = document.getElementById('badge-msg');
-  if(msgs.length > 0){ bm.textContent = msgs.length; bm.style.display=''; }
-  else bm.style.display='none';
-  document.getElementById('badge-mentors').textContent = state.mentors.length;
+  const de = document.getElementById('dash-demandes');
+  const newDems = state.demandes.filter(d=>d.status==='Nouvelle');
+  de.innerHTML = newDems.length===0
+    ? `<div class="empty-state" style="padding:30px 10px"><div class="empty-icon">📥</div><div class="empty-title">Aucune demande</div></div>`
+    : newDems.slice(0,3).map(d=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+          <div class="av ${d.avColor}" style="width:36px;height:36px;font-size:11px;border-radius:50%">${d.initiales}</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:700">${d.nom}</div><div style="font-size:11px;color:var(--muted)">${d.matiere} · ${d.filiere}</div></div>
+          <button class="abtn ab-go" onclick="openAcceptModal('${d.id}')">Répondre</button>
+        </div>`).join('');
 
-  // matches
-  const matchEl = document.getElementById('dash-matches');
-  if(state.mentors.length === 0){
-    matchEl.innerHTML = `<div class="empty-state" style="padding:30px 10px"><div class="empty-icon">🔍</div><div class="empty-title">Aucun mentor</div><div class="empty-sub">Explore les mentors pour trouver quelqu'un.</div><button class="btn-blue" onclick="goTo('explorer')">Explorer</button></div>`;
-  } else {
-    matchEl.innerHTML = state.mentors.slice(0,3).map(m => `
-      <div class="match-row">
-        <div class="av ${m.color}" style="width:38px;height:38px;font-size:12px">${m.initiales}</div>
-        <div class="mr-info"><div class="mr-name">${m.nom}</div><div class="mr-sub">${m.filiere} · ${m.chips.slice(0,2).join(', ')}</div></div>
-        <span class="score-pill ${m.score>=80?'sp-hi':'sp-md'}">${m.score}%</span>
-        <button class="abtn ab-bl" onclick="openContactModal(${m.id})">Contacter</button>
-      </div>`).join('');
-  }
-
-  // sessions
-  const sessEl = document.getElementById('dash-sessions');
-  const up = state.sessions.upcoming;
-  if(up.length === 0){
-    sessEl.innerHTML = `<div class="empty-state" style="padding:30px 10px"><div class="empty-icon">📅</div><div class="empty-title">Aucune session</div><div class="empty-sub">Demande une session à un mentor.</div><button class="btn-blue" onclick="openModal('modal-session')">Demander</button></div>`;
-  } else {
-    sessEl.innerHTML = up.slice(0,3).map(s => `
-      <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
-        <div style="flex:1"><div style="font-size:13px;font-weight:700">${s.matiere}</div><div style="font-size:11px;color:var(--muted)">avec ${s.mentor} · ${s.date} ${s.heure}</div></div>
-        <span class="sp ${s.status==='Confirmée'?'sp-ok':'sp-att'}">${s.status}</span>
-      </div>`).join('');
-  }
+  const se = document.getElementById('dash-sessions');
+  se.innerHTML = state.sessions.upcoming.length===0
+    ? `<div class="empty-state" style="padding:30px 10px"><div class="empty-icon">📅</div><div class="empty-title">Aucune session</div></div>`
+    : state.sessions.upcoming.slice(0,3).map(s=>`
+        <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
+          <div style="flex:1"><div style="font-size:13px;font-weight:700">${s.matiere}</div><div style="font-size:11px;color:var(--muted)">avec ${s.mentore} · ${s.date}</div></div>
+          <span class="sp ${s.status==='Confirmée'?'sp-ok':'sp-att'}">${s.status}</span>
+        </div>`).join('');
 }
 
-// ══════════════════════════════════
-//  RENDER MES MENTORS
-// ══════════════════════════════════
-function renderMesMentors() {
-  const el = document.getElementById('mes-mentors-list');
-  if(state.mentors.length === 0){
-    el.innerHTML = `<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Aucun mentor actif</div><div class="empty-sub">Tu n'as pas encore de mentor. Explore pour en trouver un.</div><button class="btn-blue" onclick="goTo('explorer')">Explorer les mentors</button></div>`;
+// ════════════════════════════════════════════════
+//  RENDER DEMANDES
+// ════════════════════════════════════════════════
+function renderDemandes(type) {
+  const isNew = type==='nouvelles';
+  const list  = isNew ? state.demandes.filter(d=>d.status==='Nouvelle') : state.acceptees;
+  const el    = document.getElementById(isNew?'demandes-nouvelles-list':'demandes-acceptees-list');
+  if (list.length===0) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">${isNew?'📥':'✅'}</div><div class="empty-title">${isNew?'Aucune nouvelle demande':'Aucune demande acceptée'}</div></div>`;
     return;
   }
-  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">` +
-    state.mentors.map(m => `
-      <div class="mcard">
-        <div class="mcard-top">
-          <div class="av ${m.color} mcard-av">${m.initiales}</div>
-          <div class="mcard-score">${m.score}%</div>
-        </div>
-        <div class="mcard-name">${m.nom}</div>
-        <div class="mcard-sub">${m.filiere} · ${m.niveau}</div>
-        <div class="mcard-chips">${m.chips.map(c=>`<span class="mchip">${c}</span>`).join('')}</div>
-        <div class="mcard-dispo">🕐 ${m.dispo} · ${m.format}</div>
-        <div style="display:flex;gap:7px;margin-top:12px">
-          <button class="abtn ab-bl" style="flex:1" onclick="goTo('messagerie');setTimeout(()=>openConvById(${m.id}),100)">💬 Message</button>
-          <button class="abtn ab-gh" style="flex:1" onclick="openModal('modal-session');fillSessionMentor(${m.id})">📅 Session</button>
-        </div>
-      </div>`).join('') +
-  `</div>`;
-}
-
-// ══════════════════════════════════
-//  RENDER EXPLORER
-// ══════════════════════════════════
-let exploreTag = '';
-function filterByTag(el, tag){
-  document.querySelectorAll('.fchip').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');
-  exploreTag = tag;
-  renderExplore();
-}
-function renderExplore(){
-  const search = document.getElementById('explore-search')?.value.toLowerCase() || '';
-  const filiere = document.getElementById('explore-filiere')?.value || '';
-  const format = document.getElementById('explore-format')?.value || '';
-  const filtered = state.allMentors.filter(m => {
-    const matchSearch = !search || m.nom.toLowerCase().includes(search) || m.chips.some(c=>c.toLowerCase().includes(search));
-    const matchFiliere = !filiere || m.filiere === filiere;
-    const matchFormat = !format || m.format === format || m.format === 'Les deux';
-    const matchTag = !exploreTag || m.chips.some(c=>c.toLowerCase().includes(exploreTag.toLowerCase()));
-    return matchSearch && matchFiliere && matchFormat && matchTag;
-  });
-  const el = document.getElementById('explore-results');
-  if(!el) return;
-  if(filtered.length === 0){
-    el.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🔍</div><div class="empty-title">Aucun résultat</div><div class="empty-sub">Modifie tes filtres pour trouver des mentors.</div></div>`;
-    return;
-  }
-  const myIds = state.mentors.map(m=>m.id);
-  el.innerHTML = filtered.map(m => `
-    <div class="mcard">
-      <div class="mcard-top">
-        <div class="av ${m.color} mcard-av">${m.initiales}</div>
-        <div class="mcard-score" style="color:${m.score>=80?'var(--green)':m.score>=70?'var(--orange)':'var(--red)'}">${m.score}%</div>
+  el.innerHTML = `<div class="dem-list">` + list.map(d=>`
+    <div class="dem-card ${isNew?'new-dem':''}">
+      <div class="dem-etudiant">
+        <div class="av ${d.avColor}" style="width:40px;height:40px;border-radius:50%;font-size:13px">${d.initiales}</div>
+        <div><div class="dem-name">${d.nom}</div><div class="dem-meta">${d.filiere} · ${d.niveau}</div></div>
       </div>
-      <div class="mcard-name">${m.nom}</div>
-      <div class="mcard-sub">${m.filiere} · ${m.niveau}</div>
-      <div class="mcard-chips">${m.chips.map(c=>`<span class="mchip">${c}</span>`).join('')}</div>
-      <div class="mcard-dispo">🕐 ${m.dispo}</div>
-      <div style="margin-top:12px">
-        ${myIds.includes(m.id)
-          ? `<button class="abtn ab-gh" style="width:100%;cursor:default">✓ Déjà mon mentor</button>`
-          : `<button class="abtn ab-bl" style="width:100%" onclick="addMentor(${m.id})">Contacter</button>`
-        }
+      <span class="dem-matiere">📚 ${d.matiere}</span>
+      <div class="dem-desc">${d.desc}</div>
+      <div class="dem-foot">
+        <span class="dem-time">🕐 ${d.dispo} · ${d.format}</span>
+        ${isNew
+          ? `<button class="abtn ab-go" onclick="openAcceptModal('${d.id}')">✓ Accepter</button><button class="abtn ab-rd" onclick="refuserDemande('${d.id}')">✕ Refuser</button>`
+          : `<button class="abtn ab-bl" onclick="goTo('messagerie');setTimeout(()=>openConvById('${d.id}'),100)">💬 Message</button>`}
+      </div>
+    </div>`).join('') + `</div>`;
+}
+
+// ════════════════════════════════════════════════
+//  RENDER MENTORÉS
+// ════════════════════════════════════════════════
+function renderMentores() {
+  const el = document.getElementById('mentores-actifs-grid');
+  if (state.mentores.length===0) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">👥</div><div class="empty-title">Aucun mentoré actif</div><div class="empty-sub">Accepte des demandes pour commencer.</div><button class="btn-gold" onclick="goTo('demandes-nouvelles')">Voir les demandes</button></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="mentore-grid">` + state.mentores.map(m=>`
+    <div class="mentore-card">
+      <div class="mc-top">
+        <div class="av ${m.avColor} mc-av">${m.initiales}</div>
+        <span class="sp sp-ok">Actif</span>
+      </div>
+      <div class="mc-name">${m.nom}</div>
+      <div class="mc-sub">${m.filiere} · ${m.niveau}</div>
+      <div class="mc-besoins">${m.besoins.map(b=>`<span class="mchip">${b}</span>`).join('')}</div>
+      <div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px"><span>Progression</span><span>${m.progression}%</span></div>
+        <div class="mc-pbar"><div class="mc-pfill" style="width:${m.progression}%"></div></div>
+      </div>
+      <div class="mc-actions">
+        <button class="abtn ab-bl" style="flex:1" onclick="goTo('messagerie');setTimeout(()=>openConvById('${m.id}'),100)">💬 Message</button>
+        <button class="abtn ab-gh" style="flex:1" onclick="goTo('progression-mentores')">📈 Progression</button>
+      </div>
+    </div>`).join('') + `</div>`;
+}
+
+// ════════════════════════════════════════════════
+//  RENDER PROGRESSION
+// ════════════════════════════════════════════════
+function renderProgression() {
+  const el = document.getElementById('progression-mentores-list');
+  if (state.mentores.length===0) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">📈</div><div class="empty-title">Aucun mentoré</div></div>`;
+    return;
+  }
+  el.innerHTML = state.mentores.map(m=>`
+    <div class="card">
+      <div class="card-head">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="av ${m.avColor}" style="width:36px;height:36px;border-radius:50%;font-size:11px">${m.initiales}</div>
+          <div><div style="font-size:15px;font-weight:700">${m.nom}</div><div style="font-size:12px;color:var(--muted)">${m.filiere}</div></div>
+        </div>
+        <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:${m.progression>=70?'var(--green)':m.progression>=40?'var(--gold)':'var(--red)'}">${m.progression}%</div>
+      </div>
+      <div style="height:7px;background:var(--bg);border-radius:4px;overflow:hidden;margin-bottom:14px"><div style="height:100%;border-radius:4px;background:linear-gradient(90deg,var(--gold),#FCD34D);width:${m.progression}%"></div></div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <input type="range" min="0" max="100" value="${m.progression}" style="flex:1;accent-color:var(--gold)" oninput="document.getElementById('pv-${m.id}').textContent=this.value+'%'">
+        <span id="pv-${m.id}" style="font-weight:700;color:var(--gold);min-width:40px">${m.progression}%</span>
+        <button class="abtn ab-go" onclick="saveProgression('${m.id}',document.getElementById('pv-${m.id}').textContent)">Enregistrer</button>
       </div>
     </div>`).join('');
 }
 
-function addMentor(id){
-  const m = state.allMentors.find(x=>x.id===id);
-  if(!m || state.mentors.find(x=>x.id===id)) return;
-  openContactModal(id);
+function saveProgression(id, valStr) {
+  const m = state.mentores.find(x=>x.id===id);
+  if (m) { m.progression=parseInt(valStr); toast('Progression mise à jour ✓'); renderProgression(); }
 }
 
-// ══════════════════════════════════
+// ════════════════════════════════════════════════
 //  RENDER MESSAGERIE
-// ══════════════════════════════════
-function renderMessagerie(){
+// ════════════════════════════════════════════════
+function renderMessagerie() {
   const el = document.getElementById('conv-items');
-  if(state.mentors.length === 0){
-    el.innerHTML = `<div class="conv-empty"><p>Aucune conversation.<br>Contacte un mentor pour commencer.</p></div>`;
+  if (state.mentores.length===0) {
+    el.innerHTML = `<div style="padding:30px 16px;text-align:center;color:var(--muted);font-size:13px">Aucune conversation.<br>Accepte une demande pour commencer.</div>`;
     return;
   }
-  el.innerHTML = state.mentors.map(m => {
-    const convs = state.conversations[m.id] || [];
-    const last = convs[convs.length-1];
+  el.innerHTML = state.mentores.map(m=>{
+    const convs  = state.conversations[m.id] || [];
+    const last   = convs[convs.length-1];
     const unread = convs.filter(c=>c.from!=='moi'&&!c.read).length;
-    return `
-      <div class="conv-item ${state.activeConv===m.id?'active':''} ${unread>0?'unread':''}" onclick="openConvById(${m.id})">
-        <div class="av ${m.color}" style="width:40px;height:40px;border-radius:50%;font-size:12px">${m.initiales}</div>
-        <div class="conv-body">
-          <div class="conv-head"><span class="conv-name">${m.nom}</span><span class="conv-time">${last?last.time:''}</span></div>
-          <div class="conv-prev">${last?last.text:'Envoie un message pour commencer...'}</div>
-        </div>
-        ${unread>0?`<div class="udot"></div>`:''}
-      </div>`;
+    return `<div class="conv-item ${state.activeConv===m.id?'active':''} ${unread>0?'unread':''}" onclick="openConvById('${m.id}')">
+      <div class="av ${m.avColor}" style="width:40px;height:40px;border-radius:50%;font-size:12px">${m.initiales}</div>
+      <div class="conv-body">
+        <div class="conv-head"><span class="conv-name">${m.nom}</span><span class="conv-time">${last?last.time:''}</span></div>
+        <div class="conv-prev">${last?last.text:'Envoie un message...'}</div>
+      </div>
+      ${unread>0?`<div class="udot"></div>`:''}
+    </div>`;
   }).join('');
 }
 
-function filterConvs(val){
-  document.querySelectorAll('.conv-item').forEach(el => {
+function filterConvs(val) {
+  document.querySelectorAll('#conv-items .conv-item').forEach(el=>{
     el.style.display = el.querySelector('.conv-name').textContent.toLowerCase().includes(val.toLowerCase()) ? '' : 'none';
   });
 }
 
-function openConvById(id){
+function openConvById(id) {
   state.activeConv = id;
-  const m = state.mentors.find(x=>x.id===id);
-  if(!m) return;
-  // marquer lu
-  if(state.conversations[id]) state.conversations[id].forEach(c=>c.read=true);
-
-  document.getElementById('chat-placeholder').style.display='none';
-  const active = document.getElementById('chat-active');
-  active.style.display='flex';
-
+  const m = state.mentores.find(x=>x.id===id);
+  if (!m) return;
+  if (state.conversations[id]) state.conversations[id].forEach(c=>c.read=true);
+  document.getElementById('chat-placeholder').style.display = 'none';
+  const act = document.getElementById('chat-active');
+  act.style.display = 'flex';
   const avEl = document.getElementById('chat-av');
-  avEl.textContent = m.initiales;
-  avEl.className = `av ${m.color}`;
+  avEl.textContent = m.initiales; avEl.className = `av ${m.avColor}`;
   document.getElementById('chat-name').textContent = m.nom;
-
   renderMessages(id);
   renderMessagerie();
-  renderAccueilBadges();
+  updateBadges();
 }
 
-function renderMessages(id){
+function renderMessages(id) {
   const msgs = state.conversations[id] || [];
-  const el = document.getElementById('chat-messages');
-  if(msgs.length === 0){
-    el.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;flex:1;font-size:13px;color:var(--muted)">Envoie un premier message 👋</div>`;
-    return;
-  }
-  el.innerHTML = msgs.map(m=>`
-    <div class="msg-bubble ${m.from==='moi'?'me':'other'}">
-      <div class="bubble">${m.text}</div>
-      <div class="btime">${m.time}</div>
-    </div>`).join('');
+  const el   = document.getElementById('chat-messages');
+  if (msgs.length===0) { el.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;flex:1;font-size:13px;color:var(--muted)">Envoie un premier message 👋</div>`; return; }
+  el.innerHTML = msgs.map(m=>`<div class="msg-bubble ${m.from==='moi'?'me':'other'}"><div class="bubble">${m.text}</div><div class="btime">${m.time}</div></div>`).join('');
   setTimeout(()=>el.scrollTop=el.scrollHeight,50);
 }
 
-async function sendMsg(){
+function sendMsg() {
   const input = document.getElementById('chat-input');
   const text  = input.value.trim();
-  if(!text || !state.activeConv) return;
-
-  // Affichage optimiste immédiat
+  if (!text||!state.activeConv) return;
   const now  = new Date();
   const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
-  if(!state.conversations[state.activeConv]) state.conversations[state.activeConv]=[];
-  state.conversations[state.activeConv].push({from:'moi',text,time,read:true});
-  input.value='';
+  if (!state.conversations[state.activeConv]) state.conversations[state.activeConv]=[];
+  state.conversations[state.activeConv].push({ from:'moi', text, time, read:true });
+  input.value = '';
   renderMessages(state.activeConv);
   renderMessagerie();
-
-  // Appel API en arrière-plan
-  const result = await apiFetch('/api/messaging/messages/', {
-    method: 'POST',
-    body: JSON.stringify({ destinataire_id: state.activeConv, contenu: text })
-  });
-  if(!result) toast('Message non envoyé (erreur réseau)');
 }
 
-// ══════════════════════════════════
+// ════════════════════════════════════════════════
 //  RENDER SESSIONS
-// ══════════════════════════════════
-function renderSessions(type){
-  const el = document.getElementById(`${type==='upcoming'?'upcoming':'done'}-sessions-list`);
-  if(!el) return;
+// ════════════════════════════════════════════════
+function renderSessions(type) {
+  const el   = document.getElementById(type==='upcoming'?'upcoming-list':'done-list');
   const list = state.sessions[type];
-  if(list.length===0){
-    el.innerHTML = `<div class="empty-state">
-      <div class="empty-icon">${type==='upcoming'?'📅':'✅'}</div>
-      <div class="empty-title">${type==='upcoming'?'Aucune session à venir':'Aucune session passée'}</div>
-      <div class="empty-sub">${type==='upcoming'?'Demande une session à l\'un de tes mentors.':'Tes sessions terminées apparaîtront ici.'}</div>
-      ${type==='upcoming'?`<button class="btn-blue" onclick="openModal('modal-session')">Demander une session</button>`:''}
-    </div>`;
+  if (list.length===0) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">${type==='upcoming'?'📅':'✅'}</div><div class="empty-title">${type==='upcoming'?'Aucune session à venir':'Aucune session passée'}</div></div>`;
     return;
   }
   el.innerHTML = `<div class="sess-list">` + list.map((s,i)=>`
     <div class="sess-row">
       <div class="sess-dt"><div class="sd-day">${s.dateShort}</div><div class="sd-mo">${s.mois}</div></div>
-      <div class="sess-info"><div class="sess-title">${s.matiere}</div><div class="sess-meta">avec <strong>${s.mentor}</strong> · ${s.heure} · ${s.format}</div></div>
+      <div class="sess-info"><div class="sess-title">${s.matiere}</div><div class="sess-meta">avec <strong>${s.mentore}</strong> · ${s.heure} · ${s.format}</div></div>
       <span class="sp ${s.status==='Confirmée'?'sp-ok':s.status==='En attente'?'sp-att':'sp-done'}">${s.status}</span>
       <div class="sess-actions">
-        ${type==='upcoming'?`<button class="abtn ab-bl">Rejoindre</button><button class="abtn ab-gh" onclick="cancelSession(${i})">Annuler</button>`:`<button class="abtn ab-gh">⭐ Évaluer</button>`}
+        ${type==='upcoming'
+          ? `${s.status==='En attente'?`<button class="abtn ab-go" onclick="confirmSession(${i})">Confirmer</button>`:`<button class="abtn ab-bl">Rejoindre</button>`}<button class="abtn ab-gh" onclick="cancelSession(${i})">Annuler</button>`
+          : `<button class="abtn ab-gh">📝 Note</button>`}
       </div>
     </div>`).join('') + `</div>`;
 }
 
-async function cancelSession(i){
-  const session = state.sessions.upcoming[i];
-  if(!session) return;
+function confirmSession(i) { state.sessions.upcoming[i].status='Confirmée'; renderSessions('upcoming'); toast('Session confirmée ✓'); }
+function cancelSession(i)  { state.sessions.upcoming.splice(i,1); renderSessions('upcoming'); toast('Session annulée'); }
 
-  if(session.id){
-    const result = await apiFetch(`/api/matching/sessions/${session.id}/annuler/`, { method:'PATCH' });
-    if(!result){ toast('Erreur lors de l\'annulation'); return; }
-  }
-  state.sessions.upcoming.splice(i,1);
-  renderSessions('upcoming');
-  toast('Session annulée');
-}
-
-// ══════════════════════════════════
-//  RENDER PROGRESSION
-// ══════════════════════════════════
-function renderProgression(){
-  const el = document.getElementById('prog-list');
-  const statsEl = document.getElementById('prog-stats-row');
-  const totalSess = state.sessions.done.length + state.sessions.upcoming.filter(s=>s.status==='Confirmée').length;
-  statsEl.innerHTML = `
-    <div class="pstat"><div class="pstat-num">${totalSess}</div><div class="pstat-label">Sessions totales</div></div>
-    <div class="pstat"><div class="pstat-num">${state.mentors.length}</div><div class="pstat-label">Matières suivies</div></div>
-    <div class="pstat"><div class="pstat-num">${state.progression.length>0?Math.round(state.progression.reduce((a,p)=>a+p.pct,0)/state.progression.length):0}%</div><div class="pstat-label">Progression moy.</div></div>
-    <div class="pstat"><div class="pstat-num">${state.sessions.done.length*1.5}h</div><div class="pstat-label">Temps de mentorat</div></div>
-  `;
-  if(state.progression.length===0){
-    el.innerHTML=`<div class="empty-state"><div class="empty-icon">📈</div><div class="empty-title">Aucune progression enregistrée</div><div class="empty-sub">Ta progression sera mise à jour après chaque session.</div></div>`;
+// ════════════════════════════════════════════════
+//  RENDER OFFRES
+// ════════════════════════════════════════════════
+function renderOffres() {
+  const el = document.getElementById('offres-list');
+  if (state.offres.length===0) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Aucune offre publiée</div><button class="btn-gold" onclick="openModal('modal-offre')">Publier ma première offre</button></div>`;
     return;
   }
-  el.innerHTML = state.progression.map(p=>`
-    <div class="prog-item">
-      <div class="prog-item-head">
-        <div><div class="prog-matiere">${p.matiere}</div><div class="prog-by">Mentor : ${p.mentor}</div></div>
-        <div class="prog-pct" style="color:${p.pct>=70?'var(--green)':p.pct>=40?'var(--orange)':'var(--red)'}">${p.pct}%</div>
+  el.innerHTML = `<div class="offre-list">` + state.offres.map((o,i)=>`
+    <div class="offre-card ${o.active?'active-off':''}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div><div class="offre-mat">${o.matiere}</div><div class="offre-meta">${o.format} · ${o.niveaux}</div></div>
+        <span class="sp ${o.active?'sp-ok':'sp-done'}">${o.active?'Active':'Clôturée'}</span>
       </div>
-      <div class="pbar"><div class="pfill ${p.pct>=70?'pfill-gr':p.pct>=40?'pfill-or':'pfill-bl'}" style="width:${p.pct}%"></div></div>
-      ${p.notes?`<div class="prog-notes">${p.notes.map(n=>`<div class="pnote"><span>${n.label}</span><span class="pnote-status ${n.ok==='ok'?'pnote-ok':n.ok==='mid'?'pnote-mid':'pnote-bad'}">${n.status}</span></div>`).join('')}</div>`:''}
-    </div>`).join('');
+      <div class="offre-desc">${o.desc}</div>
+      <div class="offre-foot">
+        <span class="offre-resp">${o.reponses} demande(s)</span>
+        ${o.active?`<button class="abtn ab-gh" onclick="closeOffre(${i})">Clôturer</button>`:''}
+        <button class="abtn ab-rd" onclick="deleteOffre(${i})">Supprimer</button>
+      </div>
+    </div>`).join('') + `</div>`;
 }
 
-// ══════════════════════════════════
-//  RENDER DEMANDES
-// ══════════════════════════════════
-function renderDemandes(){
-  const el = document.getElementById('demandes-list');
-  if(state.demandes.length===0){
-    el.innerHTML=`<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-title">Aucune demande publiée</div><div class="empty-sub">Publie une demande pour que les mentors puissent te contacter.</div><button class="btn-blue" onclick="openModal('modal-demande')">Créer ma première demande</button></div>`;
-    return;
-  }
-  el.innerHTML=`<div class="dem-list">`+state.demandes.map((d,i)=>`
-    <div class="dem-card ${d.status==='Active'?'bl-left':''}">
-      <div class="dem-head">
-        <div><div class="dem-mat">${d.matiere}</div><div class="dem-meta">${d.date} · ${d.format} · ${d.dispo}</div></div>
-        <span class="sp ${d.status==='Active'?'sp-ok':d.status==='En attente'?'sp-att':'sp-done'}">${d.status}</span>
-      </div>
-      <div class="dem-desc">${d.desc}</div>
-      <div class="dem-foot">
-        <span class="dem-resp">${d.reponses} réponse(s)</span>
-        ${d.status!=='Clôturée'?`<div class="dem-actions"><button class="abtn ab-gh" onclick="closeDemande(${i})">Clôturer</button></div>`:''}
-      </div>
-    </div>`).join('')+`</div>`;
-}
+function closeOffre(i)  { state.offres[i].active=false; renderOffres(); toast('Offre clôturée'); }
+function deleteOffre(i) { if(confirm('Supprimer ?')){ state.offres.splice(i,1); renderOffres(); toast('Offre supprimée'); } }
 
-async function closeDemande(i){
-  const demande = state.demandes[i];
-  if(!demande) return;
-
-  if(demande.id){
-    const result = await apiFetch(`/api/matching/demandes/${demande.id}/cloturer/`, { method:'PATCH' });
-    if(!result){ toast('Erreur lors de la clôture'); return; }
-  }
-  state.demandes[i].status = 'Clôturée';
-  renderDemandes();
-  toast('Demande clôturée');
-}
-
-// ══════════════════════════════════
+// ════════════════════════════════════════════════
 //  RENDER PROFIL
-// ══════════════════════════════════
-function renderProfil(){
-  const u = state.user;
-  const av = (u.prenom?u.prenom[0]:'')+(u.nom?u.nom[0]:'');
-  document.getElementById('topbar-av').textContent = av;
-  document.getElementById('topbar-name').textContent = (u.prenom+' '+u.nom).trim();
-  document.getElementById('profil-av').textContent = av;
-  document.getElementById('profil-name').textContent = (u.prenom+' '+u.nom).trim();
-  document.getElementById('profil-sub').textContent = u.filiere?(u.filiere+' · '+u.niveau):'';
-  document.getElementById('p-nom').value     = u.nom;
-  document.getElementById('p-prenom').value  = u.prenom;
-  document.getElementById('p-email').value   = u.email;
-  document.getElementById('p-tel').value     = u.tel;
-  document.getElementById('p-filiere').value = u.filiere;
-  document.getElementById('p-niveau').value  = u.niveau;
-  document.getElementById('p-bio').value     = u.bio;
+// ════════════════════════════════════════════════
+function renderProfil() {
+  const u = state.mentor;
+
+  // Avatars (photo ou initiales)
+  const pav  = document.getElementById('profil-av');
+  const tav  = document.getElementById('topbar-av');
+  if (u.photo) {
+    pav.innerHTML = `<img src="${u.photo}" alt="Photo profil">`;
+    tav.innerHTML = `<img src="${u.photo}" alt="Photo profil">`;
+  } else {
+    pav.textContent = (u.prenom?.[0]||'')+(u.nom?.[0]||'');
+    tav.textContent = (u.prenom?.[0]||'')+(u.nom?.[0]||'');
+  }
+
+  document.getElementById('topbar-name').textContent   = `${u.prenom} ${u.nom}`;
+  document.getElementById('profil-name').textContent   = `${u.prenom} ${u.nom}`;
+  document.getElementById('profil-sub').textContent    = `Filière ${u.filiere} · ${u.niveau}`;
+  document.getElementById('p-nom').value               = u.nom;
+  document.getElementById('p-prenom').value            = u.prenom;
+  document.getElementById('p-email').value             = u.email;
+  document.getElementById('p-tel').value               = u.tel;
+  document.getElementById('p-bio').value               = u.bio;
+
+  const done = state.sessions.done.length;
+  document.getElementById('p-stat-sess').textContent  = done;
+  document.getElementById('p-stat-ment').textContent  = state.mentores.length;
+  document.getElementById('badge-status').textContent = done>=3 ? 'Débloqué après 3 sessions ✓' : `Encore ${3-done} session(s) pour débloquer`;
+
   const pct = calcProfil();
-  document.getElementById('profil-pct-label').textContent = `Profil complété à ${pct}%`;
-  document.getElementById('profil-pct-fill').style.width = pct+'%';
-  document.getElementById('stat-profil').textContent = pct+'%';
-  document.getElementById('p-stat-sess').textContent = state.sessions.done.length;
-  document.getElementById('p-stat-ment').textContent = state.mentors.length;
-  document.getElementById('p-stat-prog').textContent = state.progression.length>0?Math.round(state.progression.reduce((a,p)=>a+p.pct,0)/state.progression.length)+'%':'0%';
+  document.getElementById('profil-pct-label').textContent  = `Profil complété à ${pct}%`;
+  document.getElementById('profil-pct-fill').style.width   = pct+'%';
 
-  // chips forts
-  document.getElementById('chips-forts').innerHTML = state.forts.map(f=>`<span class="chip">${f}</span>`).join('')+`<span class="chip add">+ Ajouter</span>`;
-  document.getElementById('chips-faibles').innerHTML = state.faibles.map(f=>`<span class="chip red">${f}</span>`).join('')+`<span class="chip add">+ Ajouter</span>`;
+  // Chips matières
+  document.getElementById('chips-matieres').innerHTML = state.matieres.map(m=>`<span class="chip">${m}</span>`).join('')+`<span class="chip add">+ Ajouter</span>`;
 
-  // dispo jours
+  // Jours dispo
   const jours = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
   document.getElementById('dispo-days').innerHTML = jours.map(j=>`<div class="dday ${state.dispo.jours.includes(j)?'active':''}" onclick="toggleJour('${j}',this)">${j.slice(0,3)}</div>`).join('');
   document.getElementById('p-hdebut').value = state.dispo.debut;
-  document.getElementById('p-hfin').value = state.dispo.fin;
+  document.getElementById('p-hfin').value   = state.dispo.fin;
+  document.getElementById('format-grid').innerHTML = ['En ligne','Présentiel','Les deux'].map(f=>`<div class="fformat ${state.formats.includes(f)?'active':''}" onclick="toggleFormat('${f}',this)">${f}</div>`).join('');
 }
 
-function calcProfil(){
-  const u = state.user;
-  let pts = 0;
-  if(u.nom) pts+=15; if(u.prenom) pts+=15; if(u.email) pts+=15; if(u.tel) pts+=10;
-  if(state.forts.length>0) pts+=15; if(state.faibles.length>0) pts+=15; if(state.dispo.jours.length>0) pts+=15;
-  return Math.min(pts,100);
+function calcProfil() {
+  const u = state.mentor; let p=0;
+  if(u.nom) p+=15; if(u.prenom) p+=10; if(u.email) p+=15; if(u.bio) p+=15;
+  if(state.matieres.length>0) p+=20; if(state.dispo.jours.length>0) p+=15; if(u.tel) p+=10;
+  return Math.min(p,100);
 }
 
 let editProfilActive = false;
-function toggleEditProfil(){
+function toggleEditProfil() {
   editProfilActive = !editProfilActive;
   ['p-nom','p-prenom','p-email','p-tel','p-filiere','p-niveau','p-bio'].forEach(id=>{
-    const el = document.getElementById(id);
-    if(el) el.disabled = !editProfilActive;
+    const el = document.getElementById(id); if(el) el.disabled = !editProfilActive;
   });
-  document.getElementById('save-profil-btn').style.display = editProfilActive?'':'none';
+  document.getElementById('save-profil-btn').style.display = editProfilActive ? '' : 'none';
 }
-async function saveProfil(){
-  state.user.nom    = document.getElementById('p-nom').value;
-  state.user.prenom = document.getElementById('p-prenom').value;
-  state.user.email  = document.getElementById('p-email').value;
-  state.user.tel    = document.getElementById('p-tel').value;
-  state.user.bio    = document.getElementById('p-bio').value;
 
-  const result = await apiFetch('/api/users/me/', {
-    method: 'PATCH',
-    body: JSON.stringify({
-      nom   : state.user.nom,
-      prenom: state.user.prenom,
-      email : state.user.email,
-      tel   : state.user.tel,
-      bio   : state.user.bio,
-    })
-  });
-
-  if(result){
-    editProfilActive = false;
-    toggleEditProfil();
-    renderProfil();
-    toast('Profil enregistré ✓');
-  } else {
-    toast('Erreur lors de la sauvegarde');
-  }
+function saveProfil() {
+  state.mentor.nom    = document.getElementById('p-nom').value;
+  state.mentor.prenom = document.getElementById('p-prenom').value;
+  state.mentor.email  = document.getElementById('p-email').value;
+  state.mentor.bio    = document.getElementById('p-bio').value;
+  // Persistance localStorage
+  const stored = JSON.parse(localStorage.getItem('currentUser') || 'null');
+  if (stored) { Object.assign(stored, state.mentor); localStorage.setItem('currentUser', JSON.stringify(stored)); }
+  editProfilActive = false; toggleEditProfil(); renderProfil(); toast('Profil enregistré ✓');
 }
-function toggleJour(j, el){
+
+function toggleJour(j, el) {
   const idx = state.dispo.jours.indexOf(j);
-  if(idx>=0) state.dispo.jours.splice(idx,1);
-  else state.dispo.jours.push(j);
+  if(idx>=0) state.dispo.jours.splice(idx,1); else state.dispo.jours.push(j);
   el.classList.toggle('active');
 }
-function saveDispo(){
+function toggleFormat(f, el) {
+  const idx = state.formats.indexOf(f);
+  if(idx>=0) state.formats.splice(idx,1); else state.formats.push(f);
+  el.classList.toggle('active');
+}
+function saveDispo() {
   state.dispo.debut = document.getElementById('p-hdebut').value;
-  state.dispo.fin = document.getElementById('p-hfin').value;
+  state.dispo.fin   = document.getElementById('p-hfin').value;
   toast('Disponibilités enregistrées ✓');
 }
 
-// ══════════════════════════════════
-//  SUBMIT ACTIONS
-// ══════════════════════════════════
-async function submitDemande(){
-  const mat  = document.getElementById('dem-matiere').value;
-  const desc = document.getElementById('dem-desc').value.trim();
-  if(!mat||!desc){ toast('Remplis tous les champs'); return; }
+// ════════════════════════════════════════════════
+//  RENDER STATS
+// ════════════════════════════════════════════════
+function renderStats() {
+  const done = state.sessions.done.length + state.sessions.upcoming.filter(s=>s.status==='Confirmée').length;
+  document.getElementById('s-total').textContent   = done;
+  document.getElementById('s-mentores').textContent= state.mentores.length;
+  document.getElementById('s-heures').textContent  = (done*1.5)+'h';
+  document.getElementById('s-note').textContent    = done>0?'4.5':'—';
 
-  const result = await apiFetch('/api/matching/demandes/', {
-    method: 'POST',
-    body: JSON.stringify({
-      matiere      : mat,
-      description  : desc,
-      format       : document.getElementById('dem-format').value,
-      disponibilite: document.getElementById('dem-dispo').value || 'Non précisé',
-    })
-  });
+  const matEl = document.getElementById('stats-matieres');
+  matEl.innerHTML = state.matieres.length===0
+    ? `<div style="font-size:13px;color:var(--muted);text-align:center;padding:20px">Aucune donnée</div>`
+    : state.matieres.map((m,i)=>`
+        <div class="prog-bar-item">
+          <div class="pb-head"><span class="pb-name">${m}</span><span class="pb-pct">${Math.max(20,80-i*15)}%</span></div>
+          <div class="pbar"><div class="pfill-go" style="height:100%;width:${Math.max(20,80-i*15)}%;border-radius:4px"></div></div>
+        </div>`).join('');
 
-  if(result){
-    state.demandes.unshift(formaterDemande(result));
-    closeModal('modal-demande');
-    document.getElementById('dem-matiere').value='';
-    document.getElementById('dem-desc').value='';
-    document.getElementById('dem-dispo').value='';
-    toast('Demande publiée ✓');
-    renderDemandes();
-  } else {
-    toast('Erreur lors de la publication');
+  const moisData = [['Jan',0],['Fév',0],['Mar',0],['Avr',0],['Mai',0],['Juin',done]];
+  document.getElementById('stats-sessions-mois').innerHTML = moisData.map(([m,v])=>`
+    <div class="prog-bar-item">
+      <div class="pb-head"><span class="pb-name">${m}</span><span class="pb-pct">${v} session(s)</span></div>
+      <div class="pbar"><div class="pfill-gr" style="height:100%;width:${v>0?Math.min(v*30,100):0}%;border-radius:4px"></div></div>
+    </div>`).join('');
+}
+
+// ════════════════════════════════════════════════
+//  ACCEPT / REFUS DEMANDES
+// ════════════════════════════════════════════════
+function openAcceptModal(id) {
+  const d = state.demandes.find(x=>x.id===id);
+  if (!d) return;
+  state.pendingAccept = id;
+  document.getElementById('accept-sub').textContent = `${d.nom} — ${d.matiere} — ${d.filiere} ${d.niveau}`;
+  openModal('modal-accept');
+}
+
+function confirmAccept() {
+  const id  = state.pendingAccept;
+  const d   = state.demandes.find(x=>x.id===id);
+  if (!d) return;
+  const msg     = document.getElementById('accept-msg').value.trim();
+  const dateVal = document.getElementById('accept-date').value;
+  const heure   = document.getElementById('accept-heure').value;
+  if (!msg) { toast('Écris un message de bienvenue'); return; }
+
+  d.status = 'Acceptée';
+  state.acceptees.push({...d});
+
+  if (!state.mentores.find(x=>x.id===d.id)) {
+    state.mentores.push({ id:d.id, initiales:d.initiales, avColor:d.avColor, nom:d.nom, filiere:d.filiere, niveau:d.niveau, besoins:[d.matiere], progression:0 });
   }
-}
 
-async function submitSession(){
-  const mId   = parseInt(document.getElementById('sess-mentor-sel').value);
-  const mentor = state.mentors.find(x=>x.id===mId);
-  if(!mentor){ toast('Sélectionne un mentor'); return; }
-  const dateVal = document.getElementById('sess-date').value;
-  const heure   = document.getElementById('sess-heure').value;
-  if(!dateVal){ toast('Indique une date'); return; }
-
-  const result = await apiFetch('/api/matching/sessions/', {
-    method: 'POST',
-    body: JSON.stringify({
-      mentor_id: mId,
-      matiere  : document.getElementById('sess-matiere').value,
-      date     : dateVal,
-      heure,
-      format   : document.getElementById('sess-format').value,
-    })
-  });
-
-  if(result){
-    state.sessions.upcoming.push(formaterSession(result));
-    closeModal('modal-session');
-    toast('Demande de session envoyée ✓');
-    renderSessions('upcoming');
-  } else {
-    toast('Erreur lors de la demande');
+  if (dateVal) {
+    const dt   = new Date(dateVal);
+    const mois = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'][dt.getMonth()];
+    state.sessions.upcoming.push({ matiere:d.matiere, mentore:d.nom, date:`${dt.getDate()} ${mois}`, dateShort:`${dt.getDate()}`, mois, heure, format:d.format, status:'En attente' });
   }
+
+  if (!state.conversations[d.id]) state.conversations[d.id]=[];
+  const now = new Date();
+  state.conversations[d.id].push({ from:'moi', text:msg, time:`${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`, read:true });
+
+  document.getElementById('accept-msg').value  = '';
+  document.getElementById('accept-date').value = '';
+  closeModal('modal-accept');
+  updateBadges();
+  toast(`Demande de ${d.nom} acceptée ✓`);
 }
 
-function fillSessionMentor(id){
-  const sel = document.getElementById('sess-mentor-sel');
-  if(sel) sel.value = id;
+function refuserDemande(id) {
+  if (!confirm('Refuser cette demande ?')) return;
+  const i = state.demandes.findIndex(x=>x.id===id);
+  if (i>=0) { state.demandes.splice(i,1); renderDemandes('nouvelles'); toast('Demande refusée'); updateBadges(); }
 }
 
-function openContactModal(id){
-  const m = state.allMentors.find(x=>x.id===id) || state.mentors.find(x=>x.id===id);
-  if(!m) return;
-  document.getElementById('contact-title').textContent = `Contacter ${m.nom}`;
-  document.getElementById('contact-sub').textContent = `${m.filiere} · ${m.niveau} · ${m.chips.join(', ')}`;
-  document.getElementById('modal-contact').dataset.mentorId = id;
-  openModal('modal-contact');
+// ════════════════════════════════════════════════
+//  SUBMIT OFFRE
+// ════════════════════════════════════════════════
+function submitOffre() {
+  const mat  = document.getElementById('offre-matiere').value;
+  const desc = document.getElementById('offre-desc').value.trim();
+  if (!mat||!desc) { toast('Remplis tous les champs'); return; }
+  state.offres.unshift({ matiere:mat, desc, niveaux:document.getElementById('offre-niveau').value, format:document.getElementById('offre-format').value, dispo:document.getElementById('offre-dispo').value, active:true, reponses:0 });
+  document.getElementById('offre-matiere').value = '';
+  document.getElementById('offre-desc').value    = '';
+  document.getElementById('offre-dispo').value   = '';
+  closeModal('modal-offre'); toast('Offre publiée ✓');
 }
 
-async function submitContact(){
-  const id  = parseInt(document.getElementById('modal-contact').dataset.mentorId);
-  const msg = document.getElementById('contact-msg').value.trim();
-  if(!msg){ toast('Écris un message'); return; }
-
-  const result = await apiFetch('/api/messaging/messages/', {
-    method: 'POST',
-    body: JSON.stringify({ destinataire_id: id, contenu: msg })
-  });
-
-  if(result){
-    // Ajouter mentor localement si pas déjà présent
-    if(!state.mentors.find(x=>x.id===id)){
-      const m = state.allMentors.find(x=>x.id===id);
-      if(m) state.mentors.push(m);
-    }
-    if(!state.conversations[id]) state.conversations[id]=[];
-    const now  = new Date();
-    const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
-    state.conversations[id].push({from:'moi',text:msg,time,read:true});
-    document.getElementById('contact-msg').value='';
-    closeModal('modal-contact');
-    toast('Message envoyé ✓');
-
-    // Ajouter à la progression si nouveau mentor
-    const mentor = state.mentors.find(x=>x.id===id);
-    if(mentor && !state.progression.find(p=>p.mentor===mentor.nom)){
-      state.progression.push({ matiere: mentor.chips[0]||'', mentor: mentor.nom, pct: 10, notes:[] });
-    }
-    document.getElementById('badge-mentors').textContent = state.mentors.length;
-    renderAccueilBadges();
-  } else {
-    toast('Erreur lors de l\'envoi');
-  }
-}
-
-function renderAccueilBadges(){
+// ════════════════════════════════════════════════
+//  BADGES
+// ════════════════════════════════════════════════
+function updateBadges() {
+  const nb = state.demandes.filter(d=>d.status==='Nouvelle').length;
+  const bd = document.getElementById('badge-dem');
+  bd.textContent = nb; bd.style.display = nb>0?'':'none';
+  document.getElementById('badge-mentores').textContent = state.mentores.length;
   const msgs = Object.values(state.conversations).flat().filter(m=>m.from!=='moi'&&!m.read);
-  document.getElementById('badge-msg').textContent = msgs.length;
-  document.getElementById('badge-msg').style.display = msgs.length>0?'':'none';
+  const bm   = document.getElementById('badge-msg');
+  bm.textContent = msgs.length; bm.style.display = msgs.length>0?'':'none';
   document.getElementById('notif-dot').className = 'notif-dot'+(msgs.length>0?' show':'');
 }
 
-// ══════════════════════════════════
+// ════════════════════════════════════════════════
 //  MODALS
-// ══════════════════════════════════
-function openModal(id){
-  // peupler mentor select si besoin
-  if(id==='modal-session'){
-    const sel = document.getElementById('sess-mentor-sel');
-    sel.innerHTML = state.mentors.length===0
-      ? `<option value="">Aucun mentor actif</option>`
-      : state.mentors.map(m=>`<option value="${m.id}">${m.nom}</option>`).join('');
-  }
-  document.getElementById(id).classList.add('show');
-}
-function closeModal(id){ document.getElementById(id).classList.remove('show'); }
-function closeOverlay(e,id){ if(e.target.id===id) closeModal(id); }
+// ════════════════════════════════════════════════
+function openModal(id)           { document.getElementById(id).classList.add('show'); }
+function closeModal(id)          { document.getElementById(id).classList.remove('show'); }
+function closeOverlay(e,id)      { if(e.target.id===id) closeModal(id); }
 
-// ══════════════════════════════════
-//  TOAST
-// ══════════════════════════════════
-function toast(msg){
+// ════════════════════════════════════════════════
+//  TOAST & LOGOUT
+// ════════════════════════════════════════════════
+function toast(msg) {
   const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.style.transform='translateY(0)';
-  el.style.opacity='1';
-  setTimeout(()=>{el.style.transform='translateY(80px)';el.style.opacity='0';},2500);
+  el.textContent = msg; el.style.transform='translateY(0)'; el.style.opacity='1';
+  setTimeout(()=>{ el.style.transform='translateY(80px)'; el.style.opacity='0'; }, 2500);
 }
 
-// ══════════════════════════════════
-//  DECONNEXION
-// ══════════════════════════════════
-function confirmLogout(){
-  if(confirm('Se déconnecter ?')){
-    clearTokens();
-    window.location.href= "connexion.html" ;
+function confirmLogout() {
+  if (confirm('Se déconnecter ?')) {
+    localStorage.removeItem('currentUser');
+    window.location.href = 'connexion.html';
   }
 }
 
-// ══════════════════════════════════
+// ════════════════════════════════════════════════
+//  SIMULATION DÉMO — retire ça en production Django
+// ════════════════════════════════════════════════
+function simulerDemande() {
+  const data = AVA_NOMS[Math.floor(Math.random()*AVA_NOMS.length)];
+  const mats = ['Algorithmique','Python','SQL','Machine Learning','Dev web'];
+  const mat  = mats[Math.floor(Math.random()*mats.length)];
+  const id   = 'dem_'+Date.now();
+  state.demandes.push({ id, initiales:data[0], avColor:AVATARS[Math.floor(Math.random()*AVATARS.length)], nom:data[1], filiere:data[2], niveau:data[3], besoins:data[4], matiere:mat, desc:`J'ai des difficultés en ${mat} et je cherche quelqu'un pour m'aider.`, dispo:'Lun/Mer 14h-17h', format:'En ligne', status:'Nouvelle' });
+  updateBadges();
+  toast(`📥 Nouvelle demande de ${data[1]} !`);
+}
+
+// ════════════════════════════════════════════════
 //  INIT
-// ══════════════════════════════════
-window.addEventListener('load', initApp);
+// ════════════════════════════════════════════════
+renderAccueil();
+renderProfil();
+setTimeout(simulerDemande, 3000);
+setTimeout(simulerDemande, 8000);
 </script>
-<script src="api.js"></script>
 </body>
 </html>

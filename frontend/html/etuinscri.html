@@ -5,7 +5,122 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IFRI_MentorLink - Inscription</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/etuinscri.css">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --blue:#1A5CFF;--blue-dark:#0F3FCC;--blue-light:#EEF3FF;
+  --navy:#0A1628;--text:#1A1A2E;--muted:#6B7280;
+  --white:#fff;--bg:#F7F9FF;--border:#E2E8F0;
+  --green:#10B981;--red:#EF4444;
+  --page-side-padding:10%;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;min-height:100vh}
+
+/* ── NAV (identique index.html) ── */
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 var(--page-side-padding);height:68px;border-bottom:1px solid var(--border);background:var(--white);position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-icon{width:36px;height:36px;background:var(--blue);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.logo-icon svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2}
+.logo-text{font-family:'Syne',sans-serif;font-weight:700;font-size:18px;color:var(--text)}
+.logo-text span{color:var(--blue)}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{text-decoration:none;color:var(--muted);font-size:14px;font-weight:500;transition:.2s}
+.nav-links a:hover{color:var(--blue)}
+.nav-cta{display:flex;gap:12px;align-items:center}
+.btn-outline{padding:8px 20px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-weight:500;color:var(--text);text-decoration:none;transition:.2s}
+.btn-outline:hover{border-color:var(--blue);color:var(--blue)}
+.btn-primary{padding:9px 22px;background:var(--blue);color:#fff;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:.2s;border:none;cursor:pointer}
+.btn-primary:hover{background:var(--blue-dark)}
+
+/* ── MAIN ── */
+main{flex:1;display:grid;grid-template-columns:1fr 1fr}
+
+/* ── LEFT PANEL ── */
+.left-panel{background:var(--navy);padding:60px 40px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
+.left-panel::before{content:'';position:absolute;top:-80px;left:-80px;width:300px;height:300px;background:radial-gradient(circle,rgba(26,92,255,.2) 0%,transparent 70%)}
+.left-panel::after{content:'';position:absolute;bottom:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(26,92,255,.12) 0%,transparent 70%)}
+.badge{display:inline-flex;align-items:center;gap:6px;background:rgba(26,92,255,.2);color:#7CB9FF;border:1px solid rgba(26,92,255,.3);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;margin-bottom:28px;width:fit-content}
+.left-panel h1{font-family:'Syne',sans-serif;font-size:40px;font-weight:700;color:#fff;line-height:1.15;margin-bottom:16px}
+.left-panel h1 span{color:#7CB9FF}
+.left-panel > p{font-size:15px;color:rgba(255,255,255,.6);line-height:1.7;margin-bottom:40px}
+.perks{display:flex;flex-direction:column;gap:20px}
+.perk{display:flex;align-items:flex-start;gap:14px}
+.perk-icon{width:44px;height:44px;background:rgba(26,92,255,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px}
+.perk-text h4{font-size:15px;font-weight:600;color:#fff;margin-bottom:4px}
+.perk-text p{font-size:13px;color:rgba(255,255,255,.5);line-height:1.5;margin:0}
+
+/* ── RIGHT PANEL ── */
+.right-panel{background:var(--white);padding:40px 50px;overflow-y:auto;max-height:calc(100vh - 68px)}
+.form-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:700;color:var(--navy);text-align:center;margin-bottom:6px}
+.form-sub{text-align:center;font-size:14px;color:var(--muted);margin-bottom:28px}
+
+/* ── RÔLE ── */
+#roleSelection{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:8px}
+#roleSelection.single{grid-template-columns:1fr;max-width:280px;margin:0 auto 8px}
+.role-card{border:2px solid var(--border);border-radius:14px;padding:16px 10px;cursor:pointer;transition:.2s;text-align:center;background:var(--white);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:var(--navy)}
+.role-card:hover{border-color:var(--blue);transform:translateY(-2px)}
+.role-card.selected{border-color:var(--blue);background:var(--blue-light);box-shadow:0 4px 12px rgba(26,92,255,.1)}
+
+/* ── DIVIDERS & FORM ── */
+.section-divider{display:flex;align-items:center;gap:12px;margin:24px 0 16px;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted)}
+.section-divider::before,.section-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+label{font-size:12px;font-weight:600;color:var(--text);letter-spacing:.3px}
+.input-wrap{position:relative}
+.input-wrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted);fill:none;stroke:currentColor;stroke-width:1.8}
+input,select,textarea{width:100%;padding:11px 12px 11px 40px;border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:var(--bg);transition:.2s;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);background:var(--white);box-shadow:0 0 0 3px rgba(26,92,255,.08)}
+input::placeholder{color:var(--muted)}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.password-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:var(--muted);background:none;border:none;font-size:16px;padding:4px}
+.password-toggle:hover{color:var(--blue)}
+
+/* ── CHIPS ── */
+.chips-label{font-size:12px;font-weight:600;color:var(--text);letter-spacing:.3px;margin-bottom:8px;margin-top:4px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.chip{padding:6px 14px;border:1.5px solid var(--border);border-radius:30px;font-size:12px;cursor:pointer;transition:.2s;background:var(--bg);color:var(--muted);font-weight:500}
+.chip:hover,.chip.active{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+
+/* ── CHECKBOX & SUBMIT ── */
+.checkbox-row{display:flex;align-items:flex-start;gap:10px;margin:16px 0 20px}
+.checkbox-row input[type="checkbox"]{width:18px;height:18px;margin-top:1px;accent-color:var(--blue);cursor:pointer;padding:0;flex-shrink:0}
+.checkbox-row label{font-size:13px;color:var(--muted);cursor:pointer;font-weight:400}
+.checkbox-row a{color:var(--blue);text-decoration:none;font-weight:500}
+.btn-submit{width:100%;padding:14px;background:var(--blue);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:'DM Sans',sans-serif;transition:.2s}
+.btn-submit:hover{background:var(--blue-dark)}
+.already{text-align:center;margin-top:16px;font-size:14px;color:var(--muted)}
+.already a{color:var(--blue);font-weight:600;text-decoration:none}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:#fff;padding:12px 20px;border-radius:40px;font-size:13px;font-weight:600;z-index:300;transform:translateY(80px);opacity:0;transition:.3s;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.error{background:var(--red)}
+
+/* ── FOOTER ── */
+footer{background:var(--navy);color:rgba(255,255,255,.5);padding:48px var(--page-side-padding) 32px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+.footer-brand p{font-size:13px;line-height:1.6;margin-top:12px;max-width:220px}
+.footer-col h4{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.9);margin-bottom:16px}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.footer-col a{text-decoration:none;color:rgba(255,255,255,.5);font-size:13px;transition:.2s}
+.footer-col a:hover{color:#fff}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:24px;display:flex;justify-content:space-between;align-items:center;font-size:12px}
+.socials{display:flex;gap:10px;margin-top:16px}
+.soc{width:32px;height:32px;border:1px solid rgba(255,255,255,.15);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;color:rgba(255,255,255,.5);text-decoration:none;transition:.2s}
+.soc:hover{border-color:var(--blue);color:var(--blue)}
+
+@media(max-width:900px){
+  main{grid-template-columns:1fr}
+  .left-panel{display:none}
+  .right-panel{padding:32px 24px;max-height:none}
+  nav{padding:0 5%}
+  .nav-links{display:none}
+  footer{padding:40px 5% 24px}
+  .footer-grid{grid-template-columns:1fr}
+  .footer-bottom{flex-direction:column;gap:8px;text-align:center}
+}
+</style>
 </head>
 <body>
 
@@ -96,11 +211,11 @@
         <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
         <select id="filiere">
           <option value="">Sélectionnez une filière</option>
-          <option value="Génie Logiciel">Génie Logiciel (GL)</option>
-          <option value="Intelligence Artificielle">Intelligence Artificielle (IA)</option>
-          <option value="Internet et multimédia">Internet et multimédia (IM)</option>
-          <option value="Systèmes Embarqués & IoT">Systèmes Embarqués & IoT (SE&IoT)</option>
-          <option value="Sécurité Informatique">Sécurité Informatique (SI)</option>
+          <option>Intelligence Artificielle (IA)</option>
+          <option>Internet et Multimedia (IM)</option>
+          <option>Génie Logiciel (GL)</option>
+          <option>Systèmes Embarqués & IoT (SE&IoT)</option>
+          <option>Sécurité Informatique (SI)</option>
         </select>
       </div>
     </div>
@@ -111,12 +226,8 @@
         <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
         <select id="niveau">
           <option value="">Sélectionnez un niveau</option>
-          <option value="Licence 1">Licence 1 (L1)</option>
-          <option value="Licence 2">Licence 2 (L2)</option>
-          <option value="Licence 3">Licence 3 (L3)</option>
-          <option value="Master 1">Master 1 (M1)</option>
-          <option value="Master 2">Master 2 (M2)</option>
-          <option value="Master 3">Master 3 (M3)</option>
+          <option>Licence 1 (L1)</option><option>Licence 2 (L2)</option><option>Licence 3 (L3)</option>
+          <option>Master 1 (M1)</option><option>Master 2 (M2)</option>
         </select>
       </div>
     </div>
@@ -207,27 +318,34 @@
 // ══════════════════════════════════════
 let selectedRole = null;
 
-function showToast(message, isError = false) {
-  let t = document.getElementById('toast');
-  if (!t) { t = document.createElement('div'); t.id = 'toast'; document.body.appendChild(t); }
-  t.textContent = message;
-  t.style.background = isError ? '#c00' : '';
-  t.classList.add('visible');
-  setTimeout(() => t.classList.remove('visible'), 3500);
-}
-
 function initRoleSelection() {
-  document.querySelectorAll('.role-card').forEach(card => {
+  const cards = document.querySelectorAll('.role-card');
+  cards.forEach(card => {
     card.addEventListener('click', () => {
       selectedRole = card.dataset.role;
-      document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+      cards.forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
+
+      if (selectedRole === 'mentor')  document.getElementById('roleMentore').style.display = 'none';
+      if (selectedRole === 'mentore') document.getElementById('roleMentor').style.display  = 'none';
+
       document.getElementById('roleSelection').classList.add('single');
       showToast(`Profil ${selectedRole === 'mentor' ? 'Mentor' : 'Mentoré'} sélectionné ✅`);
     });
   });
 }
 
+// Pré-sélection depuis URL ?role=mentor|mentore
+function setRoleFromURL() {
+  const role = new URLSearchParams(window.location.search).get('role');
+  if (!role) return;
+  const card = document.querySelector(`.role-card[data-role="${role}"]`);
+  if (card) card.click();
+}
+
+// ══════════════════════════════════════
+//  CHIPS
+// ══════════════════════════════════════
 function initChips() {
   document.querySelectorAll('.chip').forEach(chip => {
     chip.addEventListener('click', function() { this.classList.toggle('active'); });
@@ -239,6 +357,9 @@ function getActiveChips(containerId) {
     .map(c => c.dataset.skill || c.innerText.trim());
 }
 
+// ══════════════════════════════════════
+//  PASSWORD TOGGLE
+// ══════════════════════════════════════
 function initPasswordToggle() {
   document.querySelectorAll('.password-toggle').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -250,79 +371,66 @@ function initPasswordToggle() {
   });
 }
 
-function setRoleFromURL() {
-  const role = new URLSearchParams(window.location.search).get('role');
-  if (!role) return;
-  const card = document.querySelector(`.role-card[data-role="${role}"]`);
-  if (card) card.click();
-}
-
 // ══════════════════════════════════════
-//  VALIDATION
+//  VALIDATION & SUBMIT
 // ══════════════════════════════════════
 function validateForm() {
-  if (!selectedRole)                                        { showToast('Choisissez un profil (Mentor ou Mentoré)', true); return false; }
-  if (!document.getElementById('nom').value.trim())         { showToast('Nom requis', true); return false; }
-  if (!document.getElementById('prenom').value.trim())      { showToast('Prénom requis', true); return false; }
+  if (!selectedRole)                           { showToast('Choisissez un profil (Mentor ou Mentoré)', true); return false; }
+  if (!document.getElementById('nom').value.trim())    { showToast('Nom requis', true); return false; }
+  if (!document.getElementById('prenom').value.trim()) { showToast('Prénom requis', true); return false; }
   const email = document.getElementById('email').value.trim();
-  if (!email || !email.includes('@'))                       { showToast('Email valide requis', true); return false; }
-  if (!document.getElementById('telephone').value.trim())   { showToast('Téléphone requis', true); return false; }
-  if (!document.getElementById('filiere').value)            { showToast('Sélectionnez une filière', true); return false; }
-  if (!document.getElementById('niveau').value)             { showToast('Sélectionnez un niveau', true); return false; }
+  if (!email || !email.includes('@'))                  { showToast('Email valide requis', true); return false; }
+  if (!document.getElementById('telephone').value.trim()) { showToast('Téléphone requis', true); return false; }
+  if (!document.getElementById('filiere').value)       { showToast('Sélectionnez une filière', true); return false; }
+  if (!document.getElementById('niveau').value)        { showToast('Sélectionnez un niveau', true); return false; }
   const pw = document.getElementById('password').value;
-  if (pw.length < 6)                                        { showToast('Mot de passe : 6 caractères minimum', true); return false; }
+  if (pw.length < 6)                                   { showToast('Mot de passe : 6 caractères minimum', true); return false; }
   if (pw !== document.getElementById('confirmPassword').value) { showToast('Les mots de passe ne correspondent pas', true); return false; }
-  if (!document.getElementById('terms').checked)            { showToast('Acceptez les conditions générales', true); return false; }
+  if (!document.getElementById('terms').checked)       { showToast('Acceptez les conditions générales', true); return false; }
   return true;
 }
 
-// ══════════════════════════════════════
-//  SOUMISSION → API
-// ══════════════════════════════════════
-async function handleSubmit(e) {
+function handleSubmit(e) {
   e.preventDefault();
   if (!validateForm()) return;
 
-  const btn = document.getElementById('submitBtn');
-  btn.disabled = true;
-  btn.textContent = 'Création en cours…';
+  const pointsForts   = getActiveChips('#pointsFortsChips');
+  const pointsFaibles = getActiveChips('#pointsFaiblesChips');
+  const nom       = document.getElementById('nom').value.trim();
+  const prenom    = document.getElementById('prenom').value.trim();
+  const email     = document.getElementById('email').value.trim();
+  const telephone = document.getElementById('telephone').value.trim();
+  const filiere   = document.getElementById('filiere').value;
+  const niveau    = document.getElementById('niveau').value;
+  const password  = document.getElementById('password').value;
 
-  const payload = {
-    email        : document.getElementById('email').value.trim(),
-    nom          : document.getElementById('nom').value.trim(),
-    prenom       : document.getElementById('prenom').value.trim(),
-    telephone    : document.getElementById('telephone').value.trim(),
-    filiere      : document.getElementById('filiere').value,
-    niveau_etudes: document.getElementById('niveau').value,
-    bio          : '',
-    is_mentor    : selectedRole === 'mentor',
-    is_mentee    : selectedRole === 'mentore',
-    password     : document.getElementById('password').value,
-    password2    : document.getElementById('confirmPassword').value,
-  };
-
-  try {
-    const resp = await fetch('/api/users/register/', {
-      method : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body   : JSON.stringify(payload),
-    });
-    const json = await resp.json();
-
-    if (resp.ok) {
-      showToast(`🎉 ${json.message || 'Compte créé !'} Redirection vers la connexion…`);
-      setTimeout(() => { window.location.href = 'connexion.html'; }, 1800);
-    } else {
-      const msg = json.error || Object.values(json).flat().join(' ');
-      showToast(msg || 'Erreur lors de la création du compte', true);
-      btn.disabled = false;
-      btn.textContent = 'Créer mon compte';
-    }
-  } catch (err) {
-    showToast('Erreur réseau. Réessayez.', true);
-    btn.disabled = false;
-    btn.textContent = 'Créer mon compte';
+  // ── Sauvegarde localStorage (front-end demo) ──
+  // À remplacer par fetch('/api/register', { method:'POST', body:JSON.stringify({...}) })
+  const users = JSON.parse(localStorage.getItem('users') || '[]');
+  if (users.find(u => u.email === email)) {
+    showToast('Cet email est déjà utilisé', true); return;
   }
+  const newUser = { nom, prenom, email, telephone, password, role: selectedRole, filiere, niveau, pointsForts, pointsFaibles, photo: null };
+  users.push(newUser);
+  localStorage.setItem('users', JSON.stringify(users));
+  localStorage.setItem('currentUser', JSON.stringify(newUser));
+
+  showToast(`🎉 Compte créé ! Connecte-toi maintenant.`);
+  setTimeout(() => {
+    // Toujours rediriger vers connexion après inscription
+    window.location.href = 'connexion.html';
+  }, 1600);
+}
+
+// ══════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════
+function showToast(msg, isError = false) {
+  let t = document.querySelector('.toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.className   = `toast${isError ? ' error' : ''} show`;
+  setTimeout(() => t.classList.remove('show'), 3500);
 }
 
 // ══════════════════════════════════════
