@@ -1,12 +1,11 @@
 from django.contrib import admin
-from .models import Utilisateur, AnnonceMentorat, CreneauHoraire, UtilisateurDisponibilite, Matiere, UtilisateurLacune
+from .models import AnnonceMentorat, CreneauHoraire, UtilisateurDisponibilite, Matiere, UtilisateurLacune, UtilisateurCompetence, ReponseOffre, Session
 
-admin.site.register(Utilisateur)
 admin.site.register(AnnonceMentorat)
 admin.site.register(CreneauHoraire)
 admin.site.register(UtilisateurDisponibilite)
 admin.site.register(Matiere)
 admin.site.register(UtilisateurLacune)
-
-
-# Register your models here.
+admin.site.register(UtilisateurCompetence)
+admin.site.register(ReponseOffre)
+admin.site.register(Session)

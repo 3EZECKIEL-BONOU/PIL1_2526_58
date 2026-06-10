@@ -53,6 +53,8 @@ urlpatterns = [
     # =====================================================
     # FUTURS MODULES
     # =====================================================
-    # path('api/users/', include('users.urls')),
+    path(
+        'api/users/', include('users.urls')
+    ),
     # path('api/mentorship/', include('mentorship.urls')),
 ]

@@ -9,13 +9,15 @@ def create_notification_on_message(sender, instance, created, **kwargs):
     if created:
         conversation = instance.conversation
 
-        # trouver le destinataire (pas le sender)
-        recipients = conversation.participants.exclude(id=instance.sender.id)
+        # Le destinataire est celui qui n'a pas envoyé le message
+        if instance.expediteur == conversation.createur:
+            destinataire = conversation.destinataire
+        else:
+            destinataire = conversation.createur
 
-        for user in recipients:
-            Notification.objects.create(
-                utilisateur=user,
-                type_notif="message",
-                contenu=f"Nouveau message de {instance.sender}",
-                lu=False
-            )
+        Notification.objects.create(
+            utilisateur=destinataire,
+            type_notif="message",
+            contenu=f"Nouveau message de {instance.expediteur}",
+            lu=False
+        )

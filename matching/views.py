@@ -1,27 +1,41 @@
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ObjectDoesNotExist
-from .models import Utilisateur, AnnonceMentorat, UtilisateurDisponibilite
+from django.contrib.auth import get_user_model
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
-def calculer_score_matching(etudiant, annonce_mentor):
+from .models import AnnonceMentorat, UtilisateurDisponibilite, UtilisateurLacune
+
+User = get_user_model()
+
+
+def calculer_score(etudiant, offre):
     score = 0
-    mentor = annonce_mentor.auteur
+    mentor = offre.auteur
 
+    # Compatibilité filière
     if etudiant.filiere == mentor.filiere:
         score += 15
-    
-    if "Master" in mentor.niveau_etudes and "License" in etudiant.niveau_etudes:
+
+    # Compatibilité niveau
+    if "Master" in mentor.niveau_etudes and "Licence" in etudiant.niveau_etudes:
         score += 15
     elif mentor.niveau_etudes == etudiant.niveau_etudes:
         score += 10
 
-    dispos_etudiant = set(UtilisateurDisponibilite.objects.filter(utilisateur=etudiant).values_list('creneau_id', flat=True))
-    dispos_mentor = set(UtilisateurDisponibilite.objects.filter(utilisateur=mentor).values_list('creneau_id', flat=True))
-    
+    # Compatibilité horaires
+    dispos_etudiant = set(
+        UtilisateurDisponibilite.objects.filter(utilisateur=etudiant)
+        .values_list('creneau_id', flat=True)
+    )
+    dispos_mentor = set(
+        UtilisateurDisponibilite.objects.filter(utilisateur=mentor)
+        .values_list('creneau_id', flat=True)
+    )
     creneaux_communs = dispos_etudiant.intersection(dispos_mentor)
     score += min(len(creneaux_communs) * 10, 40)
 
-    if etudiant.lacunes.filter(matiere=annonce_mentor.matiere).exists():
+    # Compatibilité matière / lacunes
+    if UtilisateurLacune.objects.filter(utilisateur=etudiant, matiere=offre.matiere).exists():
         score += 30
     else:
         score += 15
@@ -29,40 +43,54 @@ def calculer_score_matching(etudiant, annonce_mentor):
     return score
 
 
-@login_required
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def liste_matching(request):
-    try:
-        etudiant_profil = request.user.profile
-    except ObjectDoesNotExist:
-        return render(request, 'matching/liste_matching.html', {
-            'erreur': "Votre profil étudiant n'est pas encore complété."
-        })
+    etudiant = request.user
 
-    offres_mentors = AnnonceMentorat.objects.filter(type_annonce='offre').select_related('auteur', 'matiere')
-    resultats_matching = []
+    offres = AnnonceMentorat.objects.filter(
+        type_annonce='offre'
+    ).select_related('auteur', 'matiere')
 
-    for offre in offres_mentors:
-        if offre.auteur == etudiant_profil:
+    resultats = []
+
+    for offre in offres:
+        if offre.auteur == etudiant:
             continue
-            
-        score = calculer_score_matching(etudiant_profil, offre)
-        
-        if score >= 20:
-            dispos_etudiant = set(UtilisateurDisponibilite.objects.filter(utilisateur=etudiant_profil).values_list('creneau__jour', 'creneau__periode'))
-            dispos_mentor = set(UtilisateurDisponibilite.objects.filter(utilisateur=offre.auteur).values_list('creneau__jour', 'creneau__periode'))
-            
-            horaires_communs = [f"{j} ({p})" for j, p in dispos_etudiant.intersection(dispos_mentor)]
 
-            resultats_matching.append({
-                'offre': offre,
-                'mentor': offre.auteur,
+        score = calculer_score(etudiant, offre)
+
+        if score >= 20:
+            dispos_e = set(
+                UtilisateurDisponibilite.objects.filter(utilisateur=etudiant)
+                .values_list('creneau__jour', 'creneau__periode')
+            )
+            dispos_m = set(
+                UtilisateurDisponibilite.objects.filter(utilisateur=offre.auteur)
+                .values_list('creneau__jour', 'creneau__periode')
+            )
+            horaires_communs = [f"{j} ({p})" for j, p in dispos_e.intersection(dispos_m)]
+
+            resultats.append({
+                'mentor': {
+                    'id': offre.auteur.id,
+                    'nom': offre.auteur.nom,
+                    'prenom': offre.auteur.prenom,
+                    'filiere': offre.auteur.filiere,
+                    'niveau_etudes': offre.auteur.niveau_etudes,
+                },
+                'offre': {
+                    'id': offre.id,
+                    'matiere': {
+                        'id': offre.matiere.id,
+                        'nom': offre.matiere.nom_matiere,
+                    },
+                    'format': offre.format_propose,
+                },
                 'score': score,
-                'horaires_communs': horaires_communs
+                'horaires_communs': horaires_communs,
             })
 
-    resultats_matching = sorted(resultats_matching, key=lambda x: x['score'], reverse=True)
+    resultats.sort(key=lambda x: x['score'], reverse=True)
 
-    return render(request, 'matching/liste_matching.html', {'recommendations': resultats_matching})
-
-
-# Create your views here.
+    return Response({'recommendations': resultats})

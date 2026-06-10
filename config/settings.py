@@ -36,7 +36,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.sites',
 
     # Third-party Apps
     'rest_framework',
@@ -47,6 +46,7 @@ INSTALLED_APPS = [
     'users',
     'messaging',
     'notifications',
+    'matching',
 ]
 
 # ==========================================================
