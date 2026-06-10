@@ -1,28 +1,35 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion - IFRI MentorLink</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<title>Connexion - IFRI MentorLink</title>
 
-    <link rel="stylesheet" href="connexion.css">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="connexion.css">
 </head>
 
 <body>
 
-<!-- NAVBAR -->
 <nav>
-    <a class="logo" href="index.html">
-        <div class="logo-icon">👥</div>
+    <a class="logo" href="#">
+        <div class="logo-icon">
+            <svg viewBox="0 0 24 24">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+        </div>
+
         <span class="logo-text">
             IFRI<span>Mentor</span>Link
         </span>
     </a>
 </nav>
 
-<!-- LOGIN SECTION -->
 <section class="login-section">
 
     <div class="login-card">
@@ -35,82 +42,108 @@
             Connectez-vous pour accéder à votre espace mentorat.
         </p>
 
-        <!-- FORM -->
-        <form onsubmit="return false;">
+        <form id="loginForm">
 
-            <!-- EMAIL -->
             <div class="input-group">
-                <label>Email universitaire</label>
-                <input type="email" id="email"
-                       placeholder="exemple@ifri.uac.bj"
-                       required>
+                <label>Email</label>
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="exemple@ifri.uac.bj"
+                    required>
             </div>
 
-            <!-- PASSWORD -->
             <div class="input-group">
                 <label>Mot de passe</label>
-                <input type="password" id="password"
-                       placeholder="********"
-                       required>
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="********"
+                    required>
             </div>
 
-            <!-- ROLE -->
-            <div class="input-group">
-                <label>Je suis</label>
-                <select id="role" required>
-                    <option value="">-- Choisir un rôle --</option>
-                    <option value="mentor">Mentor</option>
-                    <option value="mentee">Mentoré</option>
-                </select>
-            </div>
-
-            <!-- BUTTON -->
-            <button type="button" class="btn-login" onclick="handleLogin()">
+            <button type="submit" class="btn-login">
                 Se connecter
             </button>
 
         </form>
 
-        <!-- SEPARATOR -->
         <div class="separator">
             <span>ou</span>
         </div>
 
-        <!-- REGISTER -->
         <p class="register-link">
             Vous n'avez pas encore de compte ?
-            <a href="etuinscri.html">S'inscrire</a>
+            <a href="etuinscri.html">
+                S'inscrire
+            </a>
         </p>
 
     </div>
 
 </section>
 
-<!-- SCRIPT -->
 <script>
-function handleLogin() {
 
-    const email = document.getElementById("email").value;
+const form = document.getElementById("loginForm");
+
+form.addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const email    = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
-    const role = document.getElementById("role").value;
+    const btn      = form.querySelector(".btn-login");
 
-    // Vérification simple 
-    if (!email || !password || !role) {
-        alert("Veuillez remplir tous les champs !");
+    if (!email || !password) {
+        showError("Veuillez remplir tous les champs.");
         return;
     }
 
-    // Sauvegarde des infos utilisateur
-    localStorage.setItem("userEmail", email);
-    localStorage.setItem("userRole", role);
+    btn.disabled    = true;
+    btn.textContent = "Connexion…";
 
-    // Redirection selon rôle
-    if (role === "mentor") {
-        window.location.href = "dashboard-mentor.html";
-    } else {
-        window.location.href = "dashboard-mentee.html";
+    try {
+        const resp = await fetch("/api/login/", {
+            method : "POST",
+            headers: { "Content-Type": "application/json" },
+            body   : JSON.stringify({ email, password }),
+        });
+        const json = await resp.json();
+
+        if (resp.ok) {
+            localStorage.setItem("access_token",  json.access);
+            localStorage.setItem("refresh_token", json.refresh);
+            localStorage.setItem("user", JSON.stringify(json.user));
+
+            const u = json.user;
+            if (u.is_mentor) {
+                window.location.href = "dashboardmentor.html";
+            } else {
+                window.location.href = "dashboardmentee.html";
+            }
+        } else {
+            showError(json.error || "Email ou mot de passe incorrect.");
+            btn.disabled    = false;
+            btn.textContent = "Se connecter";
+        }
+    } catch (err) {
+        showError("Erreur réseau. Réessayez.");
+        btn.disabled    = false;
+        btn.textContent = "Se connecter";
     }
+});
+
+function showError(msg) {
+    let el = document.getElementById("login-error");
+    if (!el) {
+        el = document.createElement("p");
+        el.id = "login-error";
+        el.style.cssText = "color:#EF4444;font-size:13px;margin-top:10px;text-align:center;font-weight:600";
+        form.appendChild(el);
+    }
+    el.textContent = msg;
 }
+
 </script>
 
 </body>

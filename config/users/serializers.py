@@ -14,17 +14,17 @@ class InscriptionSerializer(serializers.ModelSerializer):
         model = Utilisateur
 
         fields = [
-            'username',
             'email',
             'nom',
             'prenom',
             'telephone',
-            'role',
+            'is_mentor',
+            'is_mentee',
             'filiere',
             'niveau_etudes',
             'bio',
             'password',
-            'password2'
+            'password2',
         ]
 
     def validate(self, attrs):
@@ -34,10 +34,20 @@ class InscriptionSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop('password2')
+        email = validated_data.get('email', '')
+        base = email.split('@')[0].lower().replace('.', '_').replace('+', '')
+        username = base
+        counter = 1
+        while Utilisateur.objects.filter(username=username).exists():
+            username = f"{base}{counter}"
+            counter += 1
+        validated_data['username'] = username
         return Utilisateur.objects.create_user(**validated_data)
 
 
 class ProfilSerializer(serializers.ModelSerializer):
+
+    roles = serializers.SerializerMethodField()
 
     class Meta:
         model = Utilisateur
@@ -49,13 +59,20 @@ class ProfilSerializer(serializers.ModelSerializer):
             'nom',
             'prenom',
             'telephone',
-            'role',
+            'is_mentor',
+            'is_mentee',
+            'roles',
             'filiere',
             'niveau_etudes',
             'bio',
             'photo_profil',
             'date_inscription'
         ]
+        read_only_fields = ['roles']
+
+    def get_roles(self, obj):
+        """Retourne la liste des rôles de l'utilisateur"""
+        return obj.get_roles_list()
 
 
 class ModifierMotDePasseSerializer(serializers.Serializer):

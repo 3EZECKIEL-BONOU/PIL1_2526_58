@@ -8,6 +8,7 @@ from .models import Notification
 def create_notification_on_message(sender, instance, created, **kwargs):
     if created:
         conversation = instance.conversation
+        expediteur = instance.expediteur
 
         # Le destinataire est celui qui n'a pas envoyé le message
         if instance.expediteur == conversation.createur:

@@ -50,7 +50,7 @@ class CreneauHoraire(models.Model):
         db_table = 'crenaux_horaires'
 
     def __str__(self):
-        return f"{self.jour} - {self.periode}"
+        return f"{self.jour} ({self.periode})"
 
 
 class UtilisateurCompetence(models.Model):
@@ -90,10 +90,14 @@ class AnnonceMentorat(models.Model):
     statut = models.CharField(max_length=20, default='active')
     nb_reponses = models.IntegerField(default=0)
     date_publication = models.DateTimeField(auto_now_add=True)
+    matiere = models.ForeignKey(Matiere, on_delete=models.CASCADE)
+    auteur = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, related_name='annonces')
 
     class Meta:
         db_table = 'annonces_mentorat'
 
+    def __str__(self):
+        return f"{self.type_annonce} - {self.matiere} par {self.auteur}"
 
 class ReponseOffre(models.Model):
     annonce = models.ForeignKey(AnnonceMentorat, on_delete=models.CASCADE, related_name='reponses')
