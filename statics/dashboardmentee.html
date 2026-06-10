@@ -662,7 +662,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
             <div class="fgroup"><label>TÉLÉPHONE</label><input type="tel" id="p-tel" value="+229 61 23 45 67" disabled></div>
             <div class="fgroup"><label>FILIÈRE</label>
               <select id="p-filiere" disabled>
-                <option>GL</option><option>Intelligence Artificielle</option><option>Internet et Multimedia</option><option>Systèmes Embarqués & Internet des Objets</option><option>Sécurité Informatique</option>
+                <option>GL</option><option>IA</option><option>IM</option><option>SE&IoT</option><option>SI</option>
               </select>
             </div>
             <div class="fgroup"><label>NIVEAU</label>
@@ -1624,7 +1624,7 @@ function toast(msg){
 function confirmLogout(){
   if(confirm('Se déconnecter ?')){
     clearTokens();
-    window.location.href= "connexion.html" ;
+    window.location.href='connexion_etudiant.html';
   }
 }
 

@@ -1,23 +1,33 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion - IFRI MentorLink</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<title>Connexion - IFRI MentorLink</title>
 
-    <link rel="stylesheet" href="connexion.css">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="connexion.css">
 </head>
+
 <body>
 
 <nav>
     <a class="logo" href="#">
-    <div class="logo-icon">
-      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-    </div>
-    <span class="logo-text">IFRI<span>Mentor</span>Link</span>
-  </a>
+        <div class="logo-icon">
+            <svg viewBox="0 0 24 24">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+        </div>
+
+        <span class="logo-text">
+            IFRI<span>Mentor</span>Link
+        </span>
+    </a>
 </nav>
 
 <section class="login-section">
@@ -32,12 +42,13 @@
             Connectez-vous pour accéder à votre espace mentorat.
         </p>
 
-        <form>
+        <form id="loginForm">
 
             <div class="input-group">
-                <label>Email universitaire</label>
+                <label>Email</label>
                 <input
                     type="email"
+                    id="email"
                     placeholder="exemple@ifri.uac.bj"
                     required>
             </div>
@@ -46,6 +57,7 @@
                 <label>Mot de passe</label>
                 <input
                     type="password"
+                    id="password"
                     placeholder="********"
                     required>
             </div>
@@ -70,6 +82,47 @@
     </div>
 
 </section>
+
+<script>
+
+const form = document.getElementById("loginForm");
+
+form.addEventListener("submit", function(e){
+
+    e.preventDefault();
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    let users = JSON.parse(localStorage.getItem("users")) || [];
+
+    const user = users.find(u =>
+        u.email === email &&
+        u.password === password
+    );
+
+    if(!user){
+        alert("Email ou mot de passe incorrect.");
+        return;
+    }
+
+    localStorage.setItem(
+        "currentUser",
+        JSON.stringify(user)
+    );
+
+    alert("Connexion réussie !");
+
+    if(user.role === "mentor"){
+        window.location.href = "dashboardmentor.html";
+    }
+    else{
+        window.location.href = "dashboardmentee.html";
+    }
+
+});
+
+</script>
 
 </body>
 </html>

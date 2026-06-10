@@ -662,7 +662,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
             <div class="fgroup"><label>TÉLÉPHONE</label><input type="tel" id="p-tel" value="+229 61 23 45 67" disabled></div>
             <div class="fgroup"><label>FILIÈRE</label>
               <select id="p-filiere" disabled>
-                <option>GL</option><option>Intelligence Artificielle</option><option>Internet et Multimedia</option><option>Systèmes Embarqués & Internet des Objets</option><option>Sécurité Informatique</option>
+                <option>GL</option><option>IA</option><option>IM</option><option>SE&IoT</option><option>SI</option>
               </select>
             </div>
             <div class="fgroup"><label>NIVEAU</label>
@@ -800,220 +800,41 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
   </div>
 </div>
 
-<!-- LOADER -->
-<div id="app-loader" style="display:none;position:fixed;inset:0;background:rgba(247,249,255,.85);z-index:400;align-items:center;justify-content:center;flex-direction:column;gap:14px">
-  <div style="width:40px;height:40px;border:3px solid var(--blue-light);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite"></div>
-  <span style="font-size:13px;font-weight:600;color:var(--muted)">Chargement…</span>
-</div>
-<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
-
 <!-- TOAST -->
 <div id="toast" style="position:fixed;bottom:24px;right:24px;background:var(--navy);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;transform:translateY(80px);opacity:0;transition:.3s;z-index:300;pointer-events:none"></div>
 
 <script>
-// ══════════════════════════════════════════════════════════
-//  CONFIG API
-// ══════════════════════════════════════════════════════════
-const BASE_URL = 'http://localhost:8000';
-const COLORS   = ['av-b', 'av-g', 'av-p', 'av-o'];
-
-// ── Tokens JWT ────────────────────────────────────────────
-function getAccessToken()  { return localStorage.getItem('access_token');  }
-function getRefreshToken() { return localStorage.getItem('refresh_token'); }
-function saveTokens(a, r)  { localStorage.setItem('access_token', a); localStorage.setItem('refresh_token', r); }
-function clearTokens()     { localStorage.removeItem('access_token'); localStorage.removeItem('refresh_token'); }
-
-async function refreshAccessToken() {
-  const refresh = getRefreshToken();
-  if (!refresh) return false;
-  try {
-    const res = await fetch(`${BASE_URL}/api/token/refresh/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh })
-    });
-    if (!res.ok) return false;
-    const data = await res.json();
-    localStorage.setItem('access_token', data.access);
-    return true;
-  } catch { return false; }
-}
-
-async function apiFetch(endpoint, options = {}) {
-  const makeReq = (token) => fetch(BASE_URL + endpoint, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options.headers || {})
-    }
-  });
-
-  let res = await makeReq(getAccessToken());
-
-  if (res.status === 401) {
-    const ok = await refreshAccessToken();
-    if (ok) { res = await makeReq(getAccessToken()); }
-    else { clearTokens(); window.location.href = 'connexion_etudiant.html'; return null; }
-  }
-  if (!res.ok) { console.error(`[API] ${res.status} ${endpoint}`); return null; }
-  if (res.status === 204) return true;
-  return res.json();
-}
-
-// ── Formateurs ────────────────────────────────────────────
-function formaterMentor(raw, idx = 0) {
-  const mentor = raw.mentor || raw;
-  const offre  = raw.offre  || {};
-  const prenom = mentor.prenom || '';
-  const nom    = mentor.nom    || '';
-  return {
-    id       : mentor.id,
-    initiales: `${prenom[0]||''}${nom[0]||''}`.toUpperCase(),
-    color    : COLORS[idx % COLORS.length],
-    nom      : `${prenom} ${nom}`.trim(),
-    filiere  : mentor.filiere       || '',
-    niveau   : mentor.niveau_etudes || '',
-    chips    : offre.matiere ? [offre.matiere.nom] : (mentor.competences || []),
-    score    : raw.score            || 0,
-    dispo    : (raw.horaires_communs || []).join(', ') || 'À définir',
-    format   : offre.format         || 'En ligne',
-  };
-}
-
-function formaterSession(raw) {
-  const d    = new Date(raw.date);
-  const mois = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'][d.getMonth()];
-  return {
-    id        : raw.id,
-    matiere   : raw.matiere?.nom || raw.matiere || '',
-    mentor    : raw.mentor_nom   || '',
-    date      : `${d.getDate()} ${mois}`,
-    dateShort : String(d.getDate()),
-    mois,
-    heure     : raw.heure  || '',
-    format    : raw.format || '',
-    status    : raw.statut || 'En attente',
-  };
-}
-
-function formaterDemande(raw) {
-  const d = new Date(raw.date_creation);
-  return {
-    id      : raw.id,
-    matiere : raw.matiere?.nom || raw.matiere || '',
-    desc    : raw.description  || '',
-    format  : raw.format       || '',
-    dispo   : raw.disponibilite || 'Non précisé',
-    date    : `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`,
-    status  : raw.statut === 'active' ? 'Active' : raw.statut === 'cloturee' ? 'Clôturée' : 'En attente',
-    reponses: raw.nb_reponses  || 0,
-  };
-}
-
-// ══════════════════════════════════════════════════════════
-//  ÉTAT DE L'APPLICATION  (alimenté par le backend)
-// ══════════════════════════════════════════════════════════
+// ══════════════════════════════════
+//  ÉTAT DE L'APPLICATION
+// ══════════════════════════════════
 const state = {
-  user        : { nom:'', prenom:'', email:'', tel:'', filiere:'', niveau:'', bio:'' },
-  forts       : [],
-  faibles     : [],
-  dispo       : { jours:[], debut:'', fin:'' },
-  mentors     : [],       // mentors actifs de l'étudiant
-  allMentors  : [],       // toutes les recommandations
-  conversations: {},      // id_mentor → [ {from, text, time, read} ]
-  sessions    : { upcoming: [], done: [] },
-  demandes    : [],
-  progression : [],
-  activeConv  : null,
-  filterTag   : '',
+  user: { nom:'Dupont', prenom:'Jean', email:'jean@etudiant.bj', tel:'+229 61 23 45 67', filiere:'GL', niveau:'L2', bio:'Étudiant en L2 GL, passionné par le développement web.' },
+  forts: ['Python','Dev web','Git'],
+  faibles: ['Algorithmique','Machine Learning','SQL'],
+  dispo: { jours:['Lundi','Mercredi','Vendredi'], debut:'14:00', fin:'18:00' },
+  mentors: [
+    { id:1, initiales:'KA', color:'av-b', nom:'Koffi Adjonou', filiere:'GL', niveau:'L3', chips:['Python','Algorithmique','Dev web'], score:92, dispo:'Lun/Mer 14h–17h', format:'En ligne' },
+    { id:2, initiales:'MA', color:'av-g', nom:'Mariame Alabi', filiere:'IA', niveau:'L3', chips:['Machine Learning','Stats','Python'], score:85, dispo:'Mar/Jeu 16h–18h', format:'Présentiel' },
+    { id:3, initiales:'TB', color:'av-p', nom:'Télesphore Bio', filiere:'SI', niveau:'M1', chips:['SQL','Réseaux','Linux'], score:78, dispo:'Lun/Ven 9h–12h', format:'Les deux' },
+  ],
+  allMentors: [
+    { id:1, initiales:'KA', color:'av-b', nom:'Koffi Adjonou', filiere:'GL', niveau:'L3', chips:['Python','Algorithmique','Dev web'], score:92, dispo:'Lun/Mer 14h–17h', format:'En ligne' },
+    { id:2, initiales:'MA', color:'av-g', nom:'Mariame Alabi', filiere:'IA', niveau:'L3', chips:['Machine Learning','Stats','Python'], score:85, dispo:'Mar/Jeu 16h–18h', format:'Présentiel' },
+    { id:3, initiales:'TB', color:'av-p', nom:'Télesphore Bio', filiere:'SI', niveau:'M1', chips:['SQL','Réseaux','Linux'], score:78, dispo:'Lun/Ven 9h–12h', format:'Les deux' },
+    { id:4, initiales:'FA', color:'av-o', nom:'Fatou Ahouandjinou', filiere:'IM', niveau:'L3', chips:['Maths','C++'], score:71, dispo:'Mer/Sam 10h–13h', format:'Présentiel' },
+    { id:5, initiales:'AS', color:'av-b', nom:'Abdoul Sanni', filiere:'GL', niveau:'L2', chips:['Dev web','Git'], score:68, dispo:'Jeu/Sam 15h–18h', format:'En ligne' },
+    { id:6, initiales:'RD', color:'av-g', nom:'Rachelle Dossou', filiere:'SE&IoT', niveau:'M1', chips:['Linux','Arduino','Réseaux'], score:80, dispo:'Lun/Mar 8h–11h', format:'En ligne' },
+  ],
+  conversations: {},   // id_mentor → [ {from, text, time} ]
+  sessions: {
+    upcoming: [],
+    done: [],
+  },
+  demandes: [],
+  progression: [],
+  activeConv: null,
+  filterTag: '',
 };
-
-// ══════════════════════════════════════════════════════════
-//  INITIALISATION — charge toutes les données au démarrage
-// ══════════════════════════════════════════════════════════
-async function initApp() {
-  showLoader(true);
-  try {
-    // 1. Profil utilisateur
-    const profil = await apiFetch('/api/users/me/');
-    if (profil) {
-      state.user   = {
-        nom    : profil.nom     || '',
-        prenom : profil.prenom  || '',
-        email  : profil.email   || '',
-        tel    : profil.tel     || '',
-        filiere: profil.filiere || '',
-        niveau : profil.niveau_etudes || '',
-        bio    : profil.bio     || '',
-      };
-      state.forts  = profil.points_forts  || [];
-      state.faibles= profil.lacunes_noms  || [];
-      state.dispo  = {
-        jours: profil.jours_dispo  || [],
-        debut: profil.heure_debut  || '',
-        fin  : profil.heure_fin    || '',
-      };
-    }
-
-    // 2. Recommandations de mentors (matching)
-    const matching = await apiFetch('/api/matching/');
-    if (matching?.recommendations) {
-      state.allMentors = matching.recommendations.map(formaterMentor);
-    }
-
-    // 3. Mes mentors actifs
-    const mesMentors = await apiFetch('/api/matching/mes-mentors/');
-    if (mesMentors?.mentors) {
-      state.mentors = mesMentors.mentors.map(formaterMentor);
-    }
-
-    // 4. Conversations / messages
-    const convs = await apiFetch('/api/messaging/conversations/');
-    if (convs) {
-      convs.forEach(conv => {
-        state.conversations[conv.mentor_id] = (conv.messages || []).map(m => ({
-          from : m.auteur_id === profil?.id ? 'moi' : 'autre',
-          text : m.contenu,
-          time : new Date(m.date_envoi).toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }),
-          read : m.lu,
-        }));
-      });
-    }
-
-    // 5. Sessions à venir
-    const sessUp = await apiFetch('/api/matching/sessions/?statut=upcoming');
-    if (sessUp?.sessions) {
-      state.sessions.upcoming = sessUp.sessions.map(formaterSession);
-    }
-
-    // 6. Sessions passées
-    const sessDone = await apiFetch('/api/matching/sessions/?statut=done');
-    if (sessDone?.sessions) {
-      state.sessions.done = sessDone.sessions.map(formaterSession);
-    }
-
-    // 7. Demandes de mentorat
-    const dem = await apiFetch('/api/matching/demandes/');
-    if (dem?.demandes) {
-      state.demandes = dem.demandes.map(formaterDemande);
-    }
-
-  } catch (err) {
-    console.error('[initApp]', err);
-    toast('Erreur de chargement des données');
-  } finally {
-    showLoader(false);
-    renderAccueil();
-    renderExplore();
-  }
-}
-
-function showLoader(visible) {
-  let el = document.getElementById('app-loader');
-  if (!el) return;
-  el.style.display = visible ? 'flex' : 'none';
-}
 
 // ══════════════════════════════════
 //  NAVIGATION
@@ -1263,26 +1084,17 @@ function renderMessages(id){
   setTimeout(()=>el.scrollTop=el.scrollHeight,50);
 }
 
-async function sendMsg(){
+function sendMsg(){
   const input = document.getElementById('chat-input');
-  const text  = input.value.trim();
+  const text = input.value.trim();
   if(!text || !state.activeConv) return;
-
-  // Affichage optimiste immédiat
-  const now  = new Date();
+  const now = new Date();
   const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
   if(!state.conversations[state.activeConv]) state.conversations[state.activeConv]=[];
   state.conversations[state.activeConv].push({from:'moi',text,time,read:true});
   input.value='';
   renderMessages(state.activeConv);
   renderMessagerie();
-
-  // Appel API en arrière-plan
-  const result = await apiFetch('/api/messaging/messages/', {
-    method: 'POST',
-    body: JSON.stringify({ destinataire_id: state.activeConv, contenu: text })
-  });
-  if(!result) toast('Message non envoyé (erreur réseau)');
 }
 
 // ══════════════════════════════════
@@ -1312,14 +1124,7 @@ function renderSessions(type){
     </div>`).join('') + `</div>`;
 }
 
-async function cancelSession(i){
-  const session = state.sessions.upcoming[i];
-  if(!session) return;
-
-  if(session.id){
-    const result = await apiFetch(`/api/matching/sessions/${session.id}/annuler/`, { method:'PATCH' });
-    if(!result){ toast('Erreur lors de l\'annulation'); return; }
-  }
+function cancelSession(i){
   state.sessions.upcoming.splice(i,1);
   renderSessions('upcoming');
   toast('Session annulée');
@@ -1376,15 +1181,8 @@ function renderDemandes(){
     </div>`).join('')+`</div>`;
 }
 
-async function closeDemande(i){
-  const demande = state.demandes[i];
-  if(!demande) return;
-
-  if(demande.id){
-    const result = await apiFetch(`/api/matching/demandes/${demande.id}/cloturer/`, { method:'PATCH' });
-    if(!result){ toast('Erreur lors de la clôture'); return; }
-  }
-  state.demandes[i].status = 'Clôturée';
+function closeDemande(i){
+  state.demandes[i].status='Clôturée';
   renderDemandes();
   toast('Demande clôturée');
 }
@@ -1435,32 +1233,16 @@ function toggleEditProfil(){
   });
   document.getElementById('save-profil-btn').style.display = editProfilActive?'':'none';
 }
-async function saveProfil(){
-  state.user.nom    = document.getElementById('p-nom').value;
+function saveProfil(){
+  state.user.nom = document.getElementById('p-nom').value;
   state.user.prenom = document.getElementById('p-prenom').value;
-  state.user.email  = document.getElementById('p-email').value;
-  state.user.tel    = document.getElementById('p-tel').value;
-  state.user.bio    = document.getElementById('p-bio').value;
-
-  const result = await apiFetch('/api/users/me/', {
-    method: 'PATCH',
-    body: JSON.stringify({
-      nom   : state.user.nom,
-      prenom: state.user.prenom,
-      email : state.user.email,
-      tel   : state.user.tel,
-      bio   : state.user.bio,
-    })
-  });
-
-  if(result){
-    editProfilActive = false;
-    toggleEditProfil();
-    renderProfil();
-    toast('Profil enregistré ✓');
-  } else {
-    toast('Erreur lors de la sauvegarde');
-  }
+  state.user.email = document.getElementById('p-email').value;
+  state.user.tel = document.getElementById('p-tel').value;
+  state.user.bio = document.getElementById('p-bio').value;
+  editProfilActive = false;
+  toggleEditProfil();
+  renderProfil();
+  toast('Profil enregistré ✓');
 }
 function toggleJour(j, el){
   const idx = state.dispo.jours.indexOf(j);
@@ -1477,61 +1259,40 @@ function saveDispo(){
 // ══════════════════════════════════
 //  SUBMIT ACTIONS
 // ══════════════════════════════════
-async function submitDemande(){
-  const mat  = document.getElementById('dem-matiere').value;
+function submitDemande(){
+  const mat = document.getElementById('dem-matiere').value;
   const desc = document.getElementById('dem-desc').value.trim();
   if(!mat||!desc){ toast('Remplis tous les champs'); return; }
-
-  const result = await apiFetch('/api/matching/demandes/', {
-    method: 'POST',
-    body: JSON.stringify({
-      matiere      : mat,
-      description  : desc,
-      format       : document.getElementById('dem-format').value,
-      disponibilite: document.getElementById('dem-dispo').value || 'Non précisé',
-    })
+  const now = new Date();
+  state.demandes.unshift({
+    matiere: mat, desc, format: document.getElementById('dem-format').value,
+    dispo: document.getElementById('dem-dispo').value||'Non précisé',
+    date:`${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`,
+    status:'Active', reponses:0
   });
-
-  if(result){
-    state.demandes.unshift(formaterDemande(result));
-    closeModal('modal-demande');
-    document.getElementById('dem-matiere').value='';
-    document.getElementById('dem-desc').value='';
-    document.getElementById('dem-dispo').value='';
-    toast('Demande publiée ✓');
-    renderDemandes();
-  } else {
-    toast('Erreur lors de la publication');
-  }
+  closeModal('modal-demande');
+  document.getElementById('dem-matiere').value='';
+  document.getElementById('dem-desc').value='';
+  document.getElementById('dem-dispo').value='';
+  toast('Demande publiée ✓');
 }
 
-async function submitSession(){
-  const mId   = parseInt(document.getElementById('sess-mentor-sel').value);
+function submitSession(){
+  const mId = parseInt(document.getElementById('sess-mentor-sel').value);
   const mentor = state.mentors.find(x=>x.id===mId);
   if(!mentor){ toast('Sélectionne un mentor'); return; }
   const dateVal = document.getElementById('sess-date').value;
-  const heure   = document.getElementById('sess-heure').value;
+  const heure = document.getElementById('sess-heure').value;
   if(!dateVal){ toast('Indique une date'); return; }
-
-  const result = await apiFetch('/api/matching/sessions/', {
-    method: 'POST',
-    body: JSON.stringify({
-      mentor_id: mId,
-      matiere  : document.getElementById('sess-matiere').value,
-      date     : dateVal,
-      heure,
-      format   : document.getElementById('sess-format').value,
-    })
+  const d = new Date(dateVal);
+  const mois = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'][d.getMonth()];
+  state.sessions.upcoming.push({
+    matiere: document.getElementById('sess-matiere').value,
+    mentor: mentor.nom, date:`${d.getDate()} ${mois}`, dateShort:`${d.getDate()}`,
+    mois, heure, format: document.getElementById('sess-format').value, status:'En attente'
   });
-
-  if(result){
-    state.sessions.upcoming.push(formaterSession(result));
-    closeModal('modal-session');
-    toast('Demande de session envoyée ✓');
-    renderSessions('upcoming');
-  } else {
-    toast('Erreur lors de la demande');
-  }
+  closeModal('modal-session');
+  toast('Demande de session envoyée ✓');
 }
 
 function fillSessionMentor(id){
@@ -1548,40 +1309,29 @@ function openContactModal(id){
   openModal('modal-contact');
 }
 
-async function submitContact(){
-  const id  = parseInt(document.getElementById('modal-contact').dataset.mentorId);
+function submitContact(){
+  const id = parseInt(document.getElementById('modal-contact').dataset.mentorId);
   const msg = document.getElementById('contact-msg').value.trim();
   if(!msg){ toast('Écris un message'); return; }
-
-  const result = await apiFetch('/api/messaging/messages/', {
-    method: 'POST',
-    body: JSON.stringify({ destinataire_id: id, contenu: msg })
-  });
-
-  if(result){
-    // Ajouter mentor localement si pas déjà présent
-    if(!state.mentors.find(x=>x.id===id)){
-      const m = state.allMentors.find(x=>x.id===id);
-      if(m) state.mentors.push(m);
-    }
-    if(!state.conversations[id]) state.conversations[id]=[];
-    const now  = new Date();
-    const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
-    state.conversations[id].push({from:'moi',text:msg,time,read:true});
-    document.getElementById('contact-msg').value='';
-    closeModal('modal-contact');
-    toast('Message envoyé ✓');
-
-    // Ajouter à la progression si nouveau mentor
-    const mentor = state.mentors.find(x=>x.id===id);
-    if(mentor && !state.progression.find(p=>p.mentor===mentor.nom)){
-      state.progression.push({ matiere: mentor.chips[0]||'', mentor: mentor.nom, pct: 10, notes:[] });
-    }
-    document.getElementById('badge-mentors').textContent = state.mentors.length;
-    renderAccueilBadges();
-  } else {
-    toast('Erreur lors de l\'envoi');
+  // ajouter mentor si pas déjà là
+  if(!state.mentors.find(x=>x.id===id)){
+    const m = state.allMentors.find(x=>x.id===id);
+    if(m) state.mentors.push(m);
   }
+  if(!state.conversations[id]) state.conversations[id]=[];
+  const now = new Date();
+  const time = `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+  state.conversations[id].push({from:'moi',text:msg,time,read:true});
+  document.getElementById('contact-msg').value='';
+  closeModal('modal-contact');
+  toast('Message envoyé ✓');
+  // prog : ajouter progression
+  const mentor = state.mentors.find(x=>x.id===id);
+  if(mentor && !state.progression.find(p=>p.mentor===mentor.nom)){
+    state.progression.push({ matiere: mentor.chips[0], mentor: mentor.nom, pct: 10, notes:[] });
+  }
+  document.getElementById('badge-mentors').textContent = state.mentors.length;
+  renderAccueilBadges();
 }
 
 function renderAccueilBadges(){
@@ -1622,17 +1372,14 @@ function toast(msg){
 //  DECONNEXION
 // ══════════════════════════════════
 function confirmLogout(){
-  if(confirm('Se déconnecter ?')){
-    clearTokens();
-    window.location.href= "connexion.html" ;
-  }
+  if(confirm('Se déconnecter ?')) window.location.href='connexion_etudiant.html';
 }
 
 // ══════════════════════════════════
 //  INIT
 // ══════════════════════════════════
-initApp();
+renderAccueil();
+renderExplore();
 </script>
-<script src="api.js"></script>
 </body>
 </html>

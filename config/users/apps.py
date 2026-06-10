@@ -14,5 +14,3 @@ INSTALLED_APPS = [
     'notifications',
     'matching',
 ]
-
-AUTH_USER_MODEL = 'users.Utilisateur'
