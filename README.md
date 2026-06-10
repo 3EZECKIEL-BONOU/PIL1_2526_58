@@ -129,7 +129,7 @@ Le projet a été réalisé par un groupe d’étudiants de Licence 1 IFRI.
 * **École :** IFRI
 * **Filière :** Génie Logiciel (GL)
 * **Année :** Licence 1
-* **Téléphone :** 01996091340
+* **Téléphone :** 0196091340
 * **Email :** [laminoufathiade@gmail.com](mailto:laminoufathiade@gmail.com)
 
 ---
