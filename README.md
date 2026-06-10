@@ -226,7 +226,7 @@ La plateforme est développée avec :
 
 * **Frontend :** HTML, CSS, JavaScript
 * **Backend :** Django (Python)
-* **Base de données :** PostgreSQL
+* **Base de données :** PostgreSQL / MySQL
 
 Le système utilise un algorithme de matching pour améliorer la qualité des recommandations.
 
