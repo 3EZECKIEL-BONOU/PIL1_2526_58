@@ -36,11 +36,11 @@ Le projet IFRIMentorLink vise à :
 
 # 3. Public cible
 
-La plateforme s’adresse à :
+La plateforme s’adresse aux :
 
-* les étudiants de l’IFRI (toutes filières confondues) ;
-* les mentors souhaitant accompagner d’autres étudiants ;
-* les responsables académiques.
+* Étudiants de l’IFRI (toutes filières confondues) ;
+* Mentors souhaitant accompagner d’autres étudiants ;
+* Responsables académiques.
 
 ---
 
