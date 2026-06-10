@@ -8,14 +8,18 @@ from .models import Notification
 def create_notification_on_message(sender, instance, created, **kwargs):
     if created:
         conversation = instance.conversation
+        expediteur = instance.expediteur
 
-        # trouver le destinataire (pas le sender)
-        recipients = conversation.participants.exclude(id=instance.sender.id)
+        # Notify the other participant in the conversation
+        destinataire = None
+        if conversation.createur == expediteur:
+            destinataire = conversation.destinataire
+        elif conversation.destinataire == expediteur:
+            destinataire = conversation.createur
 
-        for user in recipients:
+        if destinataire:
             Notification.objects.create(
-                utilisateur=user,
-                type_notif="message",
-                contenu=f"Nouveau message de {instance.sender}",
-                lu=False
+                utilisateur=destinataire,
+                type_notif='message',
+                contenu=f"Nouveau message de {expediteur}",
             )

@@ -3,15 +3,21 @@ from django.conf import settings
 
 
 class Notification(models.Model):
-    user = models.ForeignKey(
+    TYPE_CHOICES = (
+        ('message', 'Message'),
+        ('system', 'System'),
+    )
+
+    utilisateur = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="notifications"
     )
 
-    message = models.TextField()
-    is_read = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+    type_notif = models.CharField(max_length=50, choices=TYPE_CHOICES)
+    contenu = models.TextField()
+    lu = models.BooleanField(default=False)
+    date_notification = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user} - {self.message[:30]}"
+        return f"{self.utilisateur} - {self.contenu[:30]}"

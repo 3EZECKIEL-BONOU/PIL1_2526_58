@@ -15,7 +15,7 @@ class Conversation(models.Model):
         related_name="conversations_recues"
     )
 
-    date_creation = models.DateTimeField(auto_now_add=True)
+    date_envoi = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.createur} -> {self.destinataire}"
