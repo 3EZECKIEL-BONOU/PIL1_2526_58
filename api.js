@@ -6,7 +6,7 @@
  * ============================================================
  */
 
-const BASE_URL = 'http://localhost:8000';
+const BASE_URL = '';
 
 // ══════════════════════════════════════════════════════════
 //  GESTION DES TOKENS JWT
@@ -81,7 +81,7 @@ async function apiFetch(endpoint, options = {}) {
       res = await makeRequest(getAccessToken());
     } else {
       clearTokens();
-      window.location.href = 'connexion_etudiant.html';
+      window.location.href = 'connexion.html';
       return null;
     }
   }

@@ -19,19 +19,49 @@ Utilisateur = get_user_model()
 class RegisterAPIView(APIView):
     """
     Vue pour l'inscription des utilisateurs.
-    Permet de créer un nouveau compte mentor ou mentoré.
+    Un même email peut cumuler les rôles mentor ET mentoré.
     """
     permission_classes = [AllowAny]
 
     def post(self, request):
-        serializer = InscriptionSerializer(data=request.data)
+        email      = request.data.get('email', '').strip()
+        is_mentor  = request.data.get('is_mentor', False)
+        is_mentee  = request.data.get('is_mentee', False)
+        password   = request.data.get('password', '')
 
+        existing = Utilisateur.objects.filter(email=email).first()
+        if existing:
+            auth_user = authenticate(username=existing.username, password=password)
+            if not auth_user:
+                return Response(
+                    {"error": "Cet email est déjà enregistré. Vérifiez votre mot de passe pour y ajouter un rôle."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            changed, parts = False, []
+            if is_mentor and not existing.is_mentor:
+                existing.is_mentor = True; changed = True; parts.append("Mentor")
+            if is_mentee and not existing.is_mentee:
+                existing.is_mentee = True; changed = True; parts.append("Mentoré")
+            if not changed:
+                return Response(
+                    {"error": "Ce compte possède déjà ce(s) rôle(s)."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            existing.save()
+            refresh = RefreshToken.for_user(existing)
+            return Response({
+                "message": f"Rôle(s) {' et '.join(parts)} ajouté(s) à votre compte.",
+                "user": ProfilSerializer(existing).data,
+                "refresh": str(refresh),
+                "access": str(refresh.access_token),
+            }, status=status.HTTP_200_OK)
+
+        serializer = InscriptionSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
             refresh = RefreshToken.for_user(user)
-            
             return Response({
-                "message": "Utilisateur créé avec succès",
+                "message": "Compte créé avec succès",
                 "user": ProfilSerializer(user).data,
                 "refresh": str(refresh),
                 "access": str(refresh.access_token),
@@ -48,19 +78,26 @@ class LoginAPIView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
+        email    = (request.data.get('email') or request.data.get('username', '')).strip()
+        password = request.data.get('password', '')
 
-        if not username or not password:
+        if not email or not password:
             return Response({
-                "error": "Le nom d'utilisateur et le mot de passe sont requis"
+                "error": "L'email et le mot de passe sont requis"
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        user = authenticate(username=username, password=password)
+        try:
+            user_obj = Utilisateur.objects.get(email=email)
+        except Utilisateur.DoesNotExist:
+            return Response({
+                "error": "Email ou mot de passe incorrect"
+            }, status=status.HTTP_401_UNAUTHORIZED)
+
+        user = authenticate(username=user_obj.username, password=password)
 
         if user is None:
             return Response({
-                "error": "Nom d'utilisateur ou mot de passe incorrect"
+                "error": "Email ou mot de passe incorrect"
             }, status=status.HTTP_401_UNAUTHORIZED)
 
         # Générer les tokens JWT

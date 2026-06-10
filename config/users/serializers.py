@@ -14,7 +14,6 @@ class InscriptionSerializer(serializers.ModelSerializer):
         model = Utilisateur
 
         fields = [
-            'username',
             'email',
             'nom',
             'prenom',
@@ -25,7 +24,7 @@ class InscriptionSerializer(serializers.ModelSerializer):
             'niveau_etudes',
             'bio',
             'password',
-            'password2'
+            'password2',
         ]
 
     def validate(self, attrs):
@@ -35,6 +34,14 @@ class InscriptionSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop('password2')
+        email = validated_data.get('email', '')
+        base = email.split('@')[0].lower().replace('.', '_').replace('+', '')
+        username = base
+        counter = 1
+        while Utilisateur.objects.filter(username=username).exists():
+            username = f"{base}{counter}"
+            counter += 1
+        validated_data['username'] = username
         return Utilisateur.objects.create_user(**validated_data)
 
 

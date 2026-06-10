@@ -340,8 +340,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
       <div class="notif-dot" id="notif-dot"></div>
     </div>
     <div class="user-pill" onclick="goTo('profil')">
-      <div class="u-av" id="topbar-av">JD</div>
-      <span class="u-name" id="topbar-name">Jean Dupont</span>
+      <div class="u-av" id="topbar-av"></div>
+      <span class="u-name" id="topbar-name"></span>
       <span class="u-role">Mentoré</span>
     </div>
   </div>
@@ -637,10 +637,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
     <div class="profil-grid">
       <div>
         <div class="profil-card">
-          <div class="pav" id="profil-av">JD</div>
+          <div class="pav" id="profil-av"></div>
           <button class="btn-upload">📷 Changer la photo</button>
-          <div class="pname" id="profil-name" style="margin-top:12px">Jean Dupont</div>
-          <div class="psub" id="profil-sub">Filière GL · Licence 2</div>
+          <div class="pname" id="profil-name" style="margin-top:12px"></div>
+          <div class="psub" id="profil-sub"></div>
           <div style="margin-top:12px">
             <div class="pbar2-label" id="profil-pct-label">Profil complété à 72%</div>
             <div class="pbar2" style="margin-top:5px"><div class="pfill2" id="profil-pct-fill" style="width:72%"></div></div>
@@ -656,22 +656,33 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
         <div class="pform-card">
           <div class="pform-head"><span class="pform-title">Informations personnelles</span><button class="btn-edit-sm" onclick="toggleEditProfil()">Modifier</button></div>
           <div class="form-grid" id="profil-form">
-            <div class="fgroup"><label>NOM</label><input type="text" id="p-nom" value="Dupont" disabled></div>
-            <div class="fgroup"><label>PRÉNOM</label><input type="text" id="p-prenom" value="Jean" disabled></div>
-            <div class="fgroup"><label>EMAIL</label><input type="email" id="p-email" value="jean@etudiant.bj" disabled></div>
-            <div class="fgroup"><label>TÉLÉPHONE</label><input type="tel" id="p-tel" value="+229 61 23 45 67" disabled></div>
+            <div class="fgroup"><label>NOM</label><input type="text" id="p-nom" value="" disabled></div>
+            <div class="fgroup"><label>PRÉNOM</label><input type="text" id="p-prenom" value="" disabled></div>
+            <div class="fgroup"><label>EMAIL</label><input type="email" id="p-email" value="" disabled></div>
+            <div class="fgroup"><label>TÉLÉPHONE</label><input type="tel" id="p-tel" value="" disabled></div>
             <div class="fgroup"><label>FILIÈRE</label>
               <select id="p-filiere" disabled>
-                <option>GL</option><option>Intelligence Artificielle</option><option>Internet et Multimedia</option><option>Systèmes Embarqués & Internet des Objets</option><option>Sécurité Informatique</option>
+                <option value="">—</option>
+                <option value="Génie Logiciel">Génie Logiciel</option>
+                <option value="Intelligence Artificielle">Intelligence Artificielle</option>
+                <option value="Internet et multimédia">Internet et multimédia</option>
+                <option value="Systèmes Embarqués & IoT">Systèmes Embarqués & IoT</option>
+                <option value="Sécurité Informatique">Sécurité Informatique</option>
               </select>
             </div>
             <div class="fgroup"><label>NIVEAU</label>
               <select id="p-niveau" disabled>
-                <option>L1</option><option selected>L2</option><option>L3</option><option>M1</option><option>M2</option>
+                <option value="">—</option>
+                <option value="Licence 1">Licence 1</option>
+                <option value="Licence 2">Licence 2</option>
+                <option value="Licence 3">Licence 3</option>
+                <option value="Master 1">Master 1</option>
+                <option value="Master 2">Master 2</option>
+                <option value="Master 3">Master 3</option>
               </select>
             </div>
           </div>
-          <div class="fgroup" style="margin-top:12px"><label>BIO</label><textarea id="p-bio" disabled>Étudiant en L2 GL, passionné par le développement web.</textarea></div>
+          <div class="fgroup" style="margin-top:12px"><label>BIO</label><textarea id="p-bio" disabled></textarea></div>
           <button class="btn-blue" id="save-profil-btn" style="display:none;margin-top:14px;width:100%" onclick="saveProfil()">Enregistrer</button>
         </div>
         <div class="pform-card">
@@ -933,19 +944,25 @@ const state = {
 //  INITIALISATION — charge toutes les données au démarrage
 // ══════════════════════════════════════════════════════════
 async function initApp() {
+  const token = getAccessToken();
+  if (!token) {
+    window.location.href = 'connexion.html';
+    return;
+  }
+
   showLoader(true);
   try {
     // 1. Profil utilisateur
     const profil = await apiFetch('/api/users/me/');
     if (profil) {
       state.user   = {
-        nom    : profil.nom     || '',
-        prenom : profil.prenom  || '',
-        email  : profil.email   || '',
-        tel    : profil.tel     || '',
-        filiere: profil.filiere || '',
-        niveau : profil.niveau_etudes || '',
-        bio    : profil.bio     || '',
+        nom    : profil.nom          || '',
+        prenom : profil.prenom       || '',
+        email  : profil.email        || '',
+        tel    : profil.telephone    || '',
+        filiere: profil.filiere      || '',
+        niveau : profil.niveau_etudes|| '',
+        bio    : profil.bio          || '',
       };
       state.forts  = profil.points_forts  || [];
       state.faibles= profil.lacunes_noms  || [];
@@ -1394,11 +1411,19 @@ async function closeDemande(i){
 // ══════════════════════════════════
 function renderProfil(){
   const u = state.user;
-  document.getElementById('topbar-av').textContent = u.prenom[0]+u.nom[0];
-  document.getElementById('topbar-name').textContent = u.prenom+' '+u.nom;
-  document.getElementById('profil-av').textContent = u.prenom[0]+u.nom[0];
-  document.getElementById('profil-name').textContent = u.prenom+' '+u.nom;
-  document.getElementById('profil-sub').textContent = `Filière ${u.filiere} · ${u.niveau}`;
+  const av = (u.prenom?u.prenom[0]:'')+(u.nom?u.nom[0]:'');
+  document.getElementById('topbar-av').textContent = av;
+  document.getElementById('topbar-name').textContent = (u.prenom+' '+u.nom).trim();
+  document.getElementById('profil-av').textContent = av;
+  document.getElementById('profil-name').textContent = (u.prenom+' '+u.nom).trim();
+  document.getElementById('profil-sub').textContent = u.filiere?(u.filiere+' · '+u.niveau):'';
+  document.getElementById('p-nom').value     = u.nom;
+  document.getElementById('p-prenom').value  = u.prenom;
+  document.getElementById('p-email').value   = u.email;
+  document.getElementById('p-tel').value     = u.tel;
+  document.getElementById('p-filiere').value = u.filiere;
+  document.getElementById('p-niveau').value  = u.niveau;
+  document.getElementById('p-bio').value     = u.bio;
   const pct = calcProfil();
   document.getElementById('profil-pct-label').textContent = `Profil complété à ${pct}%`;
   document.getElementById('profil-pct-fill').style.width = pct+'%';
@@ -1631,7 +1656,7 @@ function confirmLogout(){
 // ══════════════════════════════════
 //  INIT
 // ══════════════════════════════════
-initApp();
+window.addEventListener('load', initApp);
 </script>
 <script src="api.js"></script>
 </body>

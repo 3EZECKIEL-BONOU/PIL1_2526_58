@@ -96,11 +96,11 @@
         <svg viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
         <select id="filiere">
           <option value="">Sélectionnez une filière</option>
-          <option>Intelligence Artificielle (IA)</option>
-          <option>Internet et Multimedia (IM)</option>
-          <option>Génie Logiciel (GL)</option>
-          <option>Systèmes Embarqués & IoT (SE&IoT)</option>
-          <option>Sécurité Informatique (SI)</option>
+          <option value="Génie Logiciel">Génie Logiciel (GL)</option>
+          <option value="Intelligence Artificielle">Intelligence Artificielle (IA)</option>
+          <option value="Internet et multimédia">Internet et multimédia (IM)</option>
+          <option value="Systèmes Embarqués & IoT">Systèmes Embarqués & IoT (SE&IoT)</option>
+          <option value="Sécurité Informatique">Sécurité Informatique (SI)</option>
         </select>
       </div>
     </div>
@@ -111,8 +111,12 @@
         <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
         <select id="niveau">
           <option value="">Sélectionnez un niveau</option>
-          <option>Licence 1 (L1)</option><option>Licence 2 (L2)</option><option>Licence 3 (L3)</option>
-          <option>Master 1 (M1)</option><option>Master 2 (M2)</option>
+          <option value="Licence 1">Licence 1 (L1)</option>
+          <option value="Licence 2">Licence 2 (L2)</option>
+          <option value="Licence 3">Licence 3 (L3)</option>
+          <option value="Master 1">Master 1 (M1)</option>
+          <option value="Master 2">Master 2 (M2)</option>
+          <option value="Master 3">Master 3 (M3)</option>
         </select>
       </div>
     </div>
@@ -203,119 +207,27 @@
 // ══════════════════════════════════════
 let selectedRole = null;
 
+function showToast(message, isError = false) {
+  let t = document.getElementById('toast');
+  if (!t) { t = document.createElement('div'); t.id = 'toast'; document.body.appendChild(t); }
+  t.textContent = message;
+  t.style.background = isError ? '#c00' : '';
+  t.classList.add('visible');
+  setTimeout(() => t.classList.remove('visible'), 3500);
+}
+
 function initRoleSelection() {
-  const cards = document.querySelectorAll('.role-card');
-  cards.forEach(card => {
+  document.querySelectorAll('.role-card').forEach(card => {
     card.addEventListener('click', () => {
       selectedRole = card.dataset.role;
-      cards.forEach(c => c.classList.remove('selected'));
+      document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
-
-      if (selectedRole === 'mentor')  document.getElementById('roleMentore').style.display = 'none';
-      if (selectedRole === 'mentore') document.getElementById('roleMentor').style.display  = 'none';
-
       document.getElementById('roleSelection').classList.add('single');
       showToast(`Profil ${selectedRole === 'mentor' ? 'Mentor' : 'Mentoré'} sélectionné ✅`);
     });
   });
 }
 
-  function showToast(message, isError = false) {
-    let existingToast = document.querySelector('.toast');
-    if(existingToast) existingToast.remove();
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.textContent = message;
-    if(isError) toast.style.background = "#c00";
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3500);
-  }
-
-  function initPasswordToggle() {
-    const toggles = document.querySelectorAll('.password-toggle');
-    toggles.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const targetId = btn.getAttribute('data-target');
-        const input = document.getElementById(targetId);
-        if(input) {
-          const type = input.type === 'password' ? 'text' : 'password';
-          input.type = type;
-          btn.textContent = type === 'password' ? '👁' : '🙈';
-        }
-      });
-    });
-  }
-
-  function getActiveChips(containerId) {
-    const chips = document.querySelectorAll(`${containerId} .chip.active`);
-    return Array.from(chips).map(chip => chip.getAttribute('data-skill') || chip.innerText.trim());
-  }
-
-  function validateForm() {
-    const nom = document.getElementById('nom').value.trim();
-    const prenom = document.getElementById('prenom').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const telephone = document.getElementById('telephone').value.trim();
-    const filiere = document.getElementById('filiere').value;
-    const niveau = document.getElementById('niveau').value;
-    const password = document.getElementById('password').value;
-    const confirm = document.getElementById('confirmPassword').value;
-    const terms = document.getElementById('terms').checked;
-
-    if(!selectedRole) { showToast("Veuillez choisir un rôle (Mentor ou Mentoré)", true); return false; }
-    if(!nom || !prenom) { showToast("Veuillez renseigner votre nom et prénom", true); return false; }
-    if(!email || !email.includes('@')) { showToast("Email valide requis", true); return false; }
-    if(!telephone) { showToast("Numéro de téléphone requis", true); return false; }
-    if(!filiere) { showToast("Veuillez sélectionner votre filière", true); return false; }
-    if(!niveau) { showToast("Veuillez sélectionner votre niveau", true); return false; }
-    if(password.length < 6) { showToast("Le mot de passe doit contenir au moins 6 caractères", true); return false; }
-    if(password !== confirm) { showToast("Les mots de passe ne correspondent pas", true); return false; }
-    if(!terms) { showToast("Vous devez accepter les conditions générales", true); return false; }
-    return true;
-  }
-
-  function handleSubmit(e) {
-    e.preventDefault();
-    if(!validateForm()) return;
-    const pointsForts = getActiveChips('#pointsFortsChips');
-    const pointsFaibles = getActiveChips('#pointsFaiblesChips');
-    const nom = document.getElementById('nom').value;
-    const prenom = document.getElementById('prenom').value;
-    const email = document.getElementById('email').value;
-    const telephone = document.getElementById('telephone').value;
-    const password = document.getElementById('password').value;
-    const role = selectedRole || "mentee";
-
-    let users = JSON.parse(localStorage.getItem("users")) || [];
-    users.push({ nom, prenom, email, telephone, password, role, pointsForts, pointsFaibles });
-    localStorage.setItem("users", JSON.stringify(users));
-    localStorage.setItem("currentUser", JSON.stringify({ nom, prenom, email, role }));
-
-    showToast(`🎉 Bienvenue ${prenom} ${nom} ! Votre compte ${role === "mentor" ? "Mentor" : "Mentoré"} a été créé. Redirection...`);
-    setTimeout(() => {
-      window.location.href = role === "mentor" ? "dashboardmentor.html" : "dashboardmentee.html";
-    }, 1800);
-  }
-
-  function demoFill() {
-    const urlParams = new URLSearchParams(window.location.search);
-    if(urlParams.get('demo') === '1') {
-      document.getElementById('nom').value = "Koffi";
-      document.getElementById('prenom').value = "Ange";
-      document.getElementById('email').value = "ange@ifri.bj";
-    }
-  }
-
-  function setRoleFromURL() {
-    const role = new URLSearchParams(window.location.search).get('role');
-  if (!role) return;
-  const card = document.querySelector(`.role-card[data-role="${role}"]`);
-  if (card) card.click();
-}
-
-// ══════════════════════════════════════
-//  CHIPS
-// ══════════════════════════════════════
 function initChips() {
   document.querySelectorAll('.chip').forEach(chip => {
     chip.addEventListener('click', function() { this.classList.toggle('active'); });
@@ -327,9 +239,6 @@ function getActiveChips(containerId) {
     .map(c => c.dataset.skill || c.innerText.trim());
 }
 
-// ══════════════════════════════════════
-//  PASSWORD TOGGLE
-// ══════════════════════════════════════
 function initPasswordToggle() {
   document.querySelectorAll('.password-toggle').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -341,65 +250,79 @@ function initPasswordToggle() {
   });
 }
 
+function setRoleFromURL() {
+  const role = new URLSearchParams(window.location.search).get('role');
+  if (!role) return;
+  const card = document.querySelector(`.role-card[data-role="${role}"]`);
+  if (card) card.click();
+}
+
 // ══════════════════════════════════════
-//  VALIDATION & SUBMIT
+//  VALIDATION
 // ══════════════════════════════════════
 function validateForm() {
-  if (!selectedRole)                           { showToast('Choisissez un profil (Mentor ou Mentoré)', true); return false; }
-  if (!document.getElementById('nom').value.trim())    { showToast('Nom requis', true); return false; }
-  if (!document.getElementById('prenom').value.trim()) { showToast('Prénom requis', true); return false; }
+  if (!selectedRole)                                        { showToast('Choisissez un profil (Mentor ou Mentoré)', true); return false; }
+  if (!document.getElementById('nom').value.trim())         { showToast('Nom requis', true); return false; }
+  if (!document.getElementById('prenom').value.trim())      { showToast('Prénom requis', true); return false; }
   const email = document.getElementById('email').value.trim();
-  if (!email || !email.includes('@'))                  { showToast('Email valide requis', true); return false; }
-  if (!document.getElementById('telephone').value.trim()) { showToast('Téléphone requis', true); return false; }
-  if (!document.getElementById('filiere').value)       { showToast('Sélectionnez une filière', true); return false; }
-  if (!document.getElementById('niveau').value)        { showToast('Sélectionnez un niveau', true); return false; }
+  if (!email || !email.includes('@'))                       { showToast('Email valide requis', true); return false; }
+  if (!document.getElementById('telephone').value.trim())   { showToast('Téléphone requis', true); return false; }
+  if (!document.getElementById('filiere').value)            { showToast('Sélectionnez une filière', true); return false; }
+  if (!document.getElementById('niveau').value)             { showToast('Sélectionnez un niveau', true); return false; }
   const pw = document.getElementById('password').value;
-  if (pw.length < 6)                                   { showToast('Mot de passe : 6 caractères minimum', true); return false; }
+  if (pw.length < 6)                                        { showToast('Mot de passe : 6 caractères minimum', true); return false; }
   if (pw !== document.getElementById('confirmPassword').value) { showToast('Les mots de passe ne correspondent pas', true); return false; }
-  if (!document.getElementById('terms').checked)       { showToast('Acceptez les conditions générales', true); return false; }
+  if (!document.getElementById('terms').checked)            { showToast('Acceptez les conditions générales', true); return false; }
   return true;
 }
 
-function handleSubmit(e) {
+// ══════════════════════════════════════
+//  SOUMISSION → API
+// ══════════════════════════════════════
+async function handleSubmit(e) {
   e.preventDefault();
   if (!validateForm()) return;
 
-  const pointsForts   = getActiveChips('#pointsFortsChips');
-  const pointsFaibles = getActiveChips('#pointsFaiblesChips');
-  const nom       = document.getElementById('nom').value.trim();
-  const prenom    = document.getElementById('prenom').value.trim();
-  const email     = document.getElementById('email').value.trim();
-  const telephone = document.getElementById('telephone').value.trim();
-  const filiere   = document.getElementById('filiere').value;
-  const niveau    = document.getElementById('niveau').value;
-  const password  = document.getElementById('password').value;
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Création en cours…';
 
-  // ── Sauvegarde localStorage (front-end demo) ──
-  // À remplacer par fetch('/api/register', { method:'POST', body:JSON.stringify({...}) })
-  const users = JSON.parse(localStorage.getItem('users') || '[]');
-  if (users.find(u => u.email === email)) {
-    showToast('Cet email est déjà utilisé', true); return;
+  const payload = {
+    email        : document.getElementById('email').value.trim(),
+    nom          : document.getElementById('nom').value.trim(),
+    prenom       : document.getElementById('prenom').value.trim(),
+    telephone    : document.getElementById('telephone').value.trim(),
+    filiere      : document.getElementById('filiere').value,
+    niveau_etudes: document.getElementById('niveau').value,
+    bio          : '',
+    is_mentor    : selectedRole === 'mentor',
+    is_mentee    : selectedRole === 'mentore',
+    password     : document.getElementById('password').value,
+    password2    : document.getElementById('confirmPassword').value,
+  };
+
+  try {
+    const resp = await fetch('/api/users/register/', {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body   : JSON.stringify(payload),
+    });
+    const json = await resp.json();
+
+    if (resp.ok) {
+      showToast(`🎉 ${json.message || 'Compte créé !'} Redirection vers la connexion…`);
+      setTimeout(() => { window.location.href = 'connexion.html'; }, 1800);
+    } else {
+      const msg = json.error || Object.values(json).flat().join(' ');
+      showToast(msg || 'Erreur lors de la création du compte', true);
+      btn.disabled = false;
+      btn.textContent = 'Créer mon compte';
+    }
+  } catch (err) {
+    showToast('Erreur réseau. Réessayez.', true);
+    btn.disabled = false;
+    btn.textContent = 'Créer mon compte';
   }
-  const newUser = { nom, prenom, email, telephone, password, role: selectedRole, filiere, niveau, pointsForts, pointsFaibles, photo: null };
-  users.push(newUser);
-  localStorage.setItem('users', JSON.stringify(users));
-  localStorage.setItem('currentUser', JSON.stringify(newUser));
-
-  showToast(`🎉 Bienvenue ${prenom} ! Redirection…`);
-  setTimeout(() => {
-    window.location.href = selectedRole === 'mentor' ? 'dashboard-mentor.html' : 'dashboard-mentee.html';
-  }, 1600);
-}
-
-// ══════════════════════════════════════
-//  TOAST
-// ══════════════════════════════════════
-function showToast(msg, isError = false) {
-  let t = document.querySelector('.toast');
-  if (!t) return;
-  t.textContent = msg;
-  t.className   = `toast${isError ? ' error' : ''} show`;
-  setTimeout(() => t.classList.remove('show'), 3500);
 }
 
 // ══════════════════════════════════════

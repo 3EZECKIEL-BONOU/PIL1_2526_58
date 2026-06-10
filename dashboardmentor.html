@@ -326,8 +326,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
       <div class="notif-dot" id="notif-dot"></div>
     </div>
     <div class="user-pill" onclick="goTo('profil')">
-      <div class="u-av" id="topbar-av">KA</div>
-      <span class="u-name" id="topbar-name">Koffi Adjonou</span>
+      <div class="u-av" id="topbar-av"></div>
+      <span class="u-name" id="topbar-name"></span>
       <span class="u-role">Mentor</span>
     </div>
   </div>
@@ -618,10 +618,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
     <div class="profil-grid">
       <div>
         <div class="profil-card">
-          <div class="pav" id="profil-av">KA</div>
+          <div class="pav" id="profil-av"></div>
           <button class="btn-upload">📷 Changer la photo</button>
-          <div class="pname" id="profil-name" style="margin-top:12px">Koffi Adjonou</div>
-          <div class="psub" id="profil-sub">Filière GL · Licence 3</div>
+          <div class="pname" id="profil-name" style="margin-top:12px"></div>
+          <div class="psub" id="profil-sub"></div>
           <div class="mentor-badge-card">
             <div class="mbc-label">⭐ Badge Mentor IFRI 2025-2026</div>
             <div class="mbc-val" id="badge-status">Débloqué après 3 sessions ✓</div>
@@ -641,18 +641,33 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
         <div class="pform-card">
           <div class="pform-head"><span class="pform-title">Informations personnelles</span><button class="btn-edit-sm" onclick="toggleEditProfil()">Modifier</button></div>
           <div class="form-grid" id="profil-form">
-            <div class="fgroup"><label>NOM</label><input type="text" id="p-nom" value="Adjonou" disabled></div>
-            <div class="fgroup"><label>PRÉNOM</label><input type="text" id="p-prenom" value="Koffi" disabled></div>
-            <div class="fgroup"><label>EMAIL</label><input type="email" id="p-email" value="koffi@etudiant.bj" disabled></div>
-            <div class="fgroup"><label>TÉLÉPHONE</label><input type="tel" id="p-tel" value="+229 97 12 34 56" disabled></div>
+            <div class="fgroup"><label>NOM</label><input type="text" id="p-nom" value="" disabled></div>
+            <div class="fgroup"><label>PRÉNOM</label><input type="text" id="p-prenom" value="" disabled></div>
+            <div class="fgroup"><label>EMAIL</label><input type="email" id="p-email" value="" disabled></div>
+            <div class="fgroup"><label>TÉLÉPHONE</label><input type="tel" id="p-tel" value="" disabled></div>
             <div class="fgroup"><label>FILIÈRE</label>
-              <select id="p-filiere" disabled><option selected>GL</option><option>IA</option><option>IM</option><option>SE&IoT</option><option>SI</option></select>
+              <select id="p-filiere" disabled>
+                <option value="">—</option>
+                <option value="Génie Logiciel">Génie Logiciel</option>
+                <option value="Intelligence Artificielle">Intelligence Artificielle</option>
+                <option value="Internet et multimédia">Internet et multimédia</option>
+                <option value="Systèmes Embarqués & IoT">Systèmes Embarqués & IoT</option>
+                <option value="Sécurité Informatique">Sécurité Informatique</option>
+              </select>
             </div>
             <div class="fgroup"><label>NIVEAU</label>
-              <select id="p-niveau" disabled><option>L1</option><option>L2</option><option selected>L3</option><option>M1</option><option>M2</option></select>
+              <select id="p-niveau" disabled>
+                <option value="">—</option>
+                <option value="Licence 1">Licence 1</option>
+                <option value="Licence 2">Licence 2</option>
+                <option value="Licence 3">Licence 3</option>
+                <option value="Master 1">Master 1</option>
+                <option value="Master 2">Master 2</option>
+                <option value="Master 3">Master 3</option>
+              </select>
             </div>
           </div>
-          <div class="fgroup" style="margin-top:12px"><label>BIO</label><textarea id="p-bio" disabled>Étudiant en L3 GL, passionné par l'algorithmique et le développement web. J'aime transmettre mes connaissances.</textarea></div>
+          <div class="fgroup" style="margin-top:12px"><label>BIO</label><textarea id="p-bio" disabled></textarea></div>
           <button class="btn-gold" id="save-profil-btn" style="display:none;margin-top:14px;width:100%" onclick="saveProfil()">Enregistrer</button>
         </div>
         <div class="pform-card">
@@ -796,7 +811,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);hei
 //  ÉTAT DE L'APPLICATION
 // ══════════════════════════════════════
 const state = {
-  mentor: { nom:'Adjonou', prenom:'Koffi', email:'koffi@etudiant.bj', tel:'+229 97 12 34 56', filiere:'GL', niveau:'L3', bio:"Étudiant en L3 GL, passionné par l'algorithmique et le développement web." },
+  mentor: { nom:'', prenom:'', email:'', tel:'', filiere:'', niveau:'', bio:'' },
   matieres: ['Python','Algorithmique','Dev web','Git'],
   niveaux: ['L1','L2','L3'],
   formats: ['En ligne'],
@@ -1119,11 +1134,19 @@ function deleteOffre(i){ if(confirm('Supprimer cette offre ?')){ state.offres.sp
 // ══════════════════════════════════════
 function renderProfil(){
   const u=state.mentor;
-  document.getElementById('profil-av').textContent=u.prenom[0]+u.nom[0];
-  document.getElementById('profil-name').textContent=u.prenom+' '+u.nom;
-  document.getElementById('profil-sub').textContent=`Filière ${u.filiere} · ${u.niveau}`;
-  document.getElementById('topbar-av').textContent=u.prenom[0]+u.nom[0];
-  document.getElementById('topbar-name').textContent=u.prenom+' '+u.nom;
+  const av=(u.prenom?u.prenom[0]:'')+(u.nom?u.nom[0]:'');
+  document.getElementById('profil-av').textContent=av;
+  document.getElementById('profil-name').textContent=(u.prenom+' '+u.nom).trim();
+  document.getElementById('profil-sub').textContent=u.filiere?(u.filiere+' · '+u.niveau):'';
+  document.getElementById('topbar-av').textContent=av;
+  document.getElementById('topbar-name').textContent=(u.prenom+' '+u.nom).trim();
+  document.getElementById('p-nom').value=u.nom;
+  document.getElementById('p-prenom').value=u.prenom;
+  document.getElementById('p-email').value=u.email;
+  document.getElementById('p-tel').value=u.tel;
+  document.getElementById('p-filiere').value=u.filiere;
+  document.getElementById('p-niveau').value=u.niveau;
+  document.getElementById('p-bio').value=u.bio;
   const done=state.sessions.done.length;
   document.getElementById('p-stat-sess').textContent=done;
   document.getElementById('p-stat-ment').textContent=state.mentores.length;
@@ -1306,36 +1329,46 @@ function toast(msg){
   el.textContent=msg; el.style.transform='translateY(0)'; el.style.opacity='1';
   setTimeout(()=>{ el.style.transform='translateY(80px)'; el.style.opacity='0'; },2500);
 }
-function confirmLogout(){ if(confirm('Se déconnecter ?')) window.location.href='connexion_mentor.html'; }
-
-// ══════════════════════════════════════
-//  SIMULATION : données de démo entrantes
-//  (simule un étudiant qui envoie une demande après 2s)
-// ══════════════════════════════════════
-function simulerDemande(){
-  const data=AVA_NOMS[Math.floor(Math.random()*AVA_NOMS.length)];
-  const matieres=['Algorithmique','Python','SQL','Machine Learning','Dev web'];
-  const mat=matieres[Math.floor(Math.random()*matieres.length)];
-  const id='dem_'+Date.now();
-  state.demandes.push({
-    id, initiales:data[0], avColor:AVATARS[Math.floor(Math.random()*AVATARS.length)],
-    nom:data[1], filiere:data[2], niveau:data[3], besoins:data[4],
-    matiere:mat, desc:`J'ai des difficultés en ${mat} et je cherche quelqu'un pour m'aider.`,
-    dispo:'Lun/Mer 14h-17h', format:'En ligne', status:'Nouvelle'
-  });
-  updateBadges();
-  toast(`📥 Nouvelle demande de ${data[1]} !`);
+function confirmLogout(){
+  if(confirm('Se déconnecter ?')){
+    clearTokens();
+    window.location.href='connexion.html';
+  }
 }
 
 // ══════════════════════════════════════
-//  INIT
+//  INIT — chargement des données réelles
 // ══════════════════════════════════════
-renderAccueil();
-renderProfil();
-// Simule une demande entrante après 3 secondes pour la démo
-setTimeout(simulerDemande, 3000);
-// Simule une 2e demande après 8 secondes
-setTimeout(simulerDemande, 8000);
+async function initApp() {
+  const token = getAccessToken();
+  if (!token) {
+    window.location.href = 'connexion.html';
+    return;
+  }
+
+  try {
+    const profil = await apiFetch('/api/users/me/');
+    if (!profil) return;
+
+    state.mentor = {
+      nom    : profil.nom            || '',
+      prenom : profil.prenom         || '',
+      email  : profil.email          || '',
+      tel    : profil.telephone      || '',
+      filiere: profil.filiere        || '',
+      niveau : profil.niveau_etudes  || '',
+      bio    : profil.bio            || '',
+    };
+  } catch (err) {
+    console.error('[initApp]', err);
+  }
+
+  renderAccueil();
+  renderProfil();
+}
+
+window.addEventListener('load', initApp);
 </script>
+<script src="api.js"></script>
 </body>
 </html>

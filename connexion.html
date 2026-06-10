@@ -87,40 +87,62 @@
 
 const form = document.getElementById("loginForm");
 
-form.addEventListener("submit", function(e){
-
+form.addEventListener("submit", async function(e) {
     e.preventDefault();
 
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
+    const email    = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const btn      = form.querySelector(".btn-login");
 
-    let users = JSON.parse(localStorage.getItem("users")) || [];
-
-    const user = users.find(u =>
-        u.email === email &&
-        u.password === password
-    );
-
-    if(!user){
-        alert("Email ou mot de passe incorrect.");
+    if (!email || !password) {
+        showError("Veuillez remplir tous les champs.");
         return;
     }
 
-    localStorage.setItem(
-        "currentUser",
-        JSON.stringify(user)
-    );
+    btn.disabled    = true;
+    btn.textContent = "Connexion…";
 
-    alert("Connexion réussie !");
+    try {
+        const resp = await fetch("/api/login/", {
+            method : "POST",
+            headers: { "Content-Type": "application/json" },
+            body   : JSON.stringify({ email, password }),
+        });
+        const json = await resp.json();
 
-    if(user.role === "mentor"){
-        window.location.href = "dashboardmentor.html";
+        if (resp.ok) {
+            localStorage.setItem("access_token",  json.access);
+            localStorage.setItem("refresh_token", json.refresh);
+            localStorage.setItem("user", JSON.stringify(json.user));
+
+            const u = json.user;
+            if (u.is_mentor) {
+                window.location.href = "dashboardmentor.html";
+            } else {
+                window.location.href = "dashboardmentee.html";
+            }
+        } else {
+            showError(json.error || "Email ou mot de passe incorrect.");
+            btn.disabled    = false;
+            btn.textContent = "Se connecter";
+        }
+    } catch (err) {
+        showError("Erreur réseau. Réessayez.");
+        btn.disabled    = false;
+        btn.textContent = "Se connecter";
     }
-    else{
-        window.location.href = "dashboardmentee.html";
-    }
-
 });
+
+function showError(msg) {
+    let el = document.getElementById("login-error");
+    if (!el) {
+        el = document.createElement("p");
+        el.id = "login-error";
+        el.style.cssText = "color:#EF4444;font-size:13px;margin-top:10px;text-align:center;font-weight:600";
+        form.appendChild(el);
+    }
+    el.textContent = msg;
+}
 
 </script>
 
