@@ -19,7 +19,8 @@ class InscriptionSerializer(serializers.ModelSerializer):
             'nom',
             'prenom',
             'telephone',
-            'role',
+            'is_mentor',
+            'is_mentee',
             'filiere',
             'niveau_etudes',
             'bio',
@@ -39,6 +40,8 @@ class InscriptionSerializer(serializers.ModelSerializer):
 
 class ProfilSerializer(serializers.ModelSerializer):
 
+    roles = serializers.SerializerMethodField()
+
     class Meta:
         model = Utilisateur
 
@@ -49,13 +52,20 @@ class ProfilSerializer(serializers.ModelSerializer):
             'nom',
             'prenom',
             'telephone',
-            'role',
+            'is_mentor',
+            'is_mentee',
+            'roles',
             'filiere',
             'niveau_etudes',
             'bio',
             'photo_profil',
             'date_inscription'
         ]
+        read_only_fields = ['roles']
+
+    def get_roles(self, obj):
+        """Retourne la liste des rôles de l'utilisateur"""
+        return obj.get_roles_list()
 
 
 class ModifierMotDePasseSerializer(serializers.Serializer):
